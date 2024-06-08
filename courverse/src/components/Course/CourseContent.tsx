@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/Course/CourseContent.css';
 
 interface Lesson {
   id: string;

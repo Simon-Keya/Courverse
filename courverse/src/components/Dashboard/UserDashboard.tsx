@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import ProgressTracker from '../ProgressTracker';
+import '../styles/Dashboard/UserDashboard.css';
 
 interface Course {
   id: string;

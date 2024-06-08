@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import CourseCard from './CourseCard';
+import '../styles/Course/CourseList.css';
 
 interface Course {
   id: string;

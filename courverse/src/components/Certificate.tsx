@@ -1,6 +1,7 @@
 import React from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import './styles/Certificate.css';
 
 const Certificate: React.FC = () => {
   const downloadCertificate = () => {

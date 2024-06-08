@@ -1,0 +1,90 @@
+/* CourseCard.css */
+
+/* General Card Styles */
+.course-card {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    margin: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Title Styles */
+.course-card h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Description Styles */
+.course-card p {
+    margin-top: 0.5rem;
+}
+
+/* Link Button Styles */
+.course-card .view-course {
+    display: block;
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 0.25rem;
+    text-align: center;
+    background-color: #1d4ed8;
+    transition: background-color 0.2s;
+}
+
+.course-card .view-course:hover {
+    background-color: #1e3a8a;
+}
+
+/* Specific Background Colors for Courses */
+.course-card.HTML {
+    background-color: #f16529;
+    /* HTML Orange */
+}
+
+.course-card.CSS {
+    background-color: #2965f1;
+    /* CSS Blue */
+}
+
+.course-card.JavaScript {
+    background-color: #f7df1e;
+    /* JavaScript Yellow */
+    color: #000;
+    /* Ensure text is readable */
+}
+
+.course-card.TypeScript {
+    background-color: #3178c6;
+    /* TypeScript Blue */
+}
+
+.course-card.Python {
+    background-color: #306998;
+    /* Python Blue */
+}
+
+.course-card.Java {
+    background-color: #b07219;
+    /* Java Brownish */
+}
+
+.course-card.CSharp {
+    background-color: #9b4f96;
+    /* C# Purple */
+}
+
+.course-card.CPlusPlus {
+    background-color: #00599c;
+    /* C++ Blue */
+    color: #fff;
+    /* Ensure text is readable */
+}

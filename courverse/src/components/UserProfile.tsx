@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import './styles/UserProfile.css';
 
 const UserProfile: React.FC = () => {
-  const { currentUser, updateProfile } = useAuth(); // Ensure useAuth is correctly imported
+  const { currentUser } = useAuth(); // Ensure useAuth is correctly imported
   const [name, setName] = useState(currentUser?.displayName || '');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      setError('');
-      if (updateProfile) {
-        await updateProfile(name); // Pass name directly to updateProfile
-        // handle success, e.g., show a message or redirect
-      }
-    } catch {
-      setError('Failed to update profile');
-    }
+    // Since updateProfile is removed, handleSubmit is simplified
+    setError('Profile update functionality is not available.');
   };
 
   return (
@@ -47,10 +41,10 @@ const UserProfile: React.FC = () => {
         </div>
         <button type="submit" className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700">
           Update Profile
-      </button>
-    </form>
-</div>
-);
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default UserProfile;

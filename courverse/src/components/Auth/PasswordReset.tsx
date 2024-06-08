@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useAuth } from '.../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
+import '../styles/Auth/PasswordReset.css';
 
 const PasswordReset: React.FC = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const { resetPassword } = useAuth();
-  const history = useHistory();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

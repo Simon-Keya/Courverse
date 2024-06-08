@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import '../styles/Course/CourseCard.css';
 
 interface CourseCardProps {
   id: string;

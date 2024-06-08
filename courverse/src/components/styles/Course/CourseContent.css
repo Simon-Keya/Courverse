@@ -1,0 +1,51 @@
+/* CourseContent.css */
+
+/* Style for the lessons section */
+.course-content {
+    margin-top: 2rem;
+}
+
+/* Style for the lesson title */
+.lesson-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Style for the lesson content */
+.lesson-content {
+    margin-top: 1rem;
+}
+
+/* Style for the lesson item */
+.lesson-item {
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the completed lesson */
+.completed-lesson {
+    background-color: #d1f7d8;
+}
+
+/* Style for the incomplete lesson */
+.incomplete-lesson {
+    background-color: #ffffff;
+}
+
+/* Style for the button to mark lesson as complete */
+.complete-button {
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #3498db;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+/* Style for the button to mark lesson as complete on hover */
+.complete-button:hover {
+    background-color: #2980b9;
+}

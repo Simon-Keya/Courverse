@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useAuth } from '.../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom'; // Updated import
+import { useAuth } from '../../contexts/AuthContext';
+import '../styles/Auth/Login.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate(); // Updated hook
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
       await login(email, password);
-      history.push('/');
+      navigate('/'); // Updated navigation
     } catch (error) {
       setError('Failed to log in');
     }

@@ -1,4 +1,5 @@
 import React from 'react';
+import './styles/ProgressTracker.css';
 
 interface ProgressTrackerProps {
   completedLessons: number;

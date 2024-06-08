@@ -14,11 +14,10 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  updateProfile: (displayName: string) => Promise<void>;
-  logout: () => Promise<void>; // Add the logout function
+  logout: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined); // Export AuthContext
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -32,23 +31,24 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const mapFirebaseUserToUser = (user: FirebaseUser): User => ({
+  id: user.uid,
+  email: user.email || '',
+  displayName: user.displayName || '',
+});
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user: FirebaseUser | null) => {
       if (user) {
-        setCurrentUser({
-          id: user.uid,
-          email: user.email || '',
-          displayName: user.displayName || '',
-        });
+        setCurrentUser(mapFirebaseUserToUser(user));
       } else {
         setCurrentUser(null);
       }
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
@@ -64,24 +64,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await authResetPassword(email);
   };
 
-  const updateProfile = async (displayName: string) => {
-    if (auth.currentUser) {
-      await auth.currentUser.updateProfile({
-        displayName: displayName,
-      });
-      setCurrentUser({
-        ...currentUser!,
-        displayName: displayName,
-      });
-    }
-  };
-
-  const logout = async () => { // Implement logout function
+  const logout = async () => {
     await auth.signOut();
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, register, resetPassword, updateProfile, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, register, resetPassword, logout }}>
       {children}
     </AuthContext.Provider>
   );

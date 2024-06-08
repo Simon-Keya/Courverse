@@ -1,6 +1,8 @@
+// Header.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import './styles/Header.css';
 
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
@@ -33,7 +35,10 @@ const Header: React.FC = () => {
               <button onClick={handleLogout} className="px-4">Logout</button>
             </>
           ) : (
-            <Link to="/login" className="px-4">Login</Link>
+            <>
+              <Link to="/login" className="px-4">Login</Link>
+              <Link to="/register" className="px-4">Register</Link>
+            </>
           )}
         </nav>
       </div>

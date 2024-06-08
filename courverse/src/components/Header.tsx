@@ -7,10 +7,12 @@ const Header: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      redirectToLogin();
-    } catch {
-      // handle error
+      if (logout) {
+        await logout(); // Check if logout function exists before calling it
+        redirectToLogin();
+      }
+    } catch (error) {
+      console.error('Failed to logout:', error); // Handle error gracefully
     }
   };
 

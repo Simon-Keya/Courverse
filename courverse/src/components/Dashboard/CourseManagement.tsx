@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+}
+
 const CourseManagement: React.FC = () => {
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    axios.get('/api/courses').then((response) => {
+    axios.get<Course[]>('/api/courses').then((response) => {
       setCourses(response.data);
     });
   }, []);

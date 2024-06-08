@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState(''); // Added displayName
   const [error, setError] = useState('');
-  const { register } = useAuth();
-  const history = useHistory();
+  const { register } = useAuth() || {}; // Ensure useAuth returns an object with register
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,10 +17,14 @@ const Register: React.FC = () => {
       setError('Passwords do not match');
       return;
     }
+    if (!register) {
+      setError('Registration function not available');
+      return;
+    }
     setError('');
     try {
-      await register(email, password);
-      history.push('/');
+      await register(email, password, displayName); // Pass displayName
+      navigate('/');
     } catch (error) {
       setError('Failed to create an account');
     }
@@ -60,6 +65,17 @@ const Register: React.FC = () => {
               id="confirm-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 mt-1 border rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+            />
+          </div>
+          <div>
+            <label htmlFor="display-name" className="block text-sm font-medium text-gray-700">Display Name</label>
+            <input
+              type="text"
+              id="display-name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
               required
               className="w-full px-3 py-2 mt-1 border rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
             />

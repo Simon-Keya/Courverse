@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+interface User {
+  id: string;
+  displayName?: string;
+  email?: string;
+}
+
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    axios.get('/api/users').then((response) => {
+    axios.get<User[]>('/api/users').then((response) => {
       setUsers(response.data);
     });
   }, []);

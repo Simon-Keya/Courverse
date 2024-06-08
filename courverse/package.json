@@ -51,7 +51,9 @@
     ]
   },
   "devDependencies": {
+    "@types/firebase": "^3.2.1",
     "autoprefixer": "^10.4.19",
+    "cspell": "^8.8.4",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4"
   }

@@ -4,16 +4,22 @@ import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import ProgressTracker from '../ProgressTracker';
 
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+}
+
 const UserDashboard: React.FC = () => {
   const { currentUser } = useAuth();
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
   const [completedLessons, setCompletedLessons] = useState<{ [key: string]: number }>({});
   const [totalLessons, setTotalLessons] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     if (currentUser) {
       // Fetch the enrolled courses for the current user
-      axios.get(`/api/users/${currentUser.uid}/enrolledCourses`).then((response) => {
+      axios.get<Course[]>(`/api/users/${currentUser.id}/enrolledCourses`).then((response) => {
         setEnrolledCourses(response.data);
       });
     }
@@ -22,7 +28,7 @@ const UserDashboard: React.FC = () => {
   useEffect(() => {
     enrolledCourses.forEach((course) => {
       axios.get(`/api/courses/${course.id}`).then((response) => {
-        const courseData = response.data;
+        const courseData: { id: string; lessons: { completed: boolean }[] } = response.data;
         setTotalLessons((prevTotalLessons) => ({
           ...prevTotalLessons,
           [course.id]: courseData.lessons.length,

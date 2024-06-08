@@ -1,23 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import CourseManagement from '../components/Dashboard/CourseManagement';
+import React from 'react';
+import AdminDashboard from '../components/Dashboard/AdminDashboard';
 
-const AdminDashboard: React.FC = () => {
-  const [courses, setCourses] = useState([]);
-
-  useEffect(() => {
-    // Fetch courses from the API
-    axios.get('/api/courses').then((response) => {
-      setCourses(response.data);
-    });
-  }, []);
-
+const AdminPage: React.FC = () => {
   return (
-    <div className="container mx-auto mt-8">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-      <CourseManagement courses={courses} />
+    <div>
+      <h1>Admin Dashboard</h1>
+      <AdminDashboard />
     </div>
   );
 };
 
-export default AdminDashboard;
+export default AdminPage;

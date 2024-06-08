@@ -2,17 +2,18 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const UserProfile: React.FC = () => {
-  const { currentUser, updateProfile } = useAuth();
+  const { currentUser, updateProfile } = useAuth(); // Ensure useAuth is correctly imported
   const [name, setName] = useState(currentUser?.displayName || '');
-  const [email, setEmail] = useState(currentUser?.email || '');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setError('');
-      await updateProfile({ displayName: name });
-      // handle success, e.g., show a message or redirect
+      if (updateProfile) {
+        await updateProfile(name); // Pass name directly to updateProfile
+        // handle success, e.g., show a message or redirect
+      }
     } catch {
       setError('Failed to update profile');
     }
@@ -39,17 +40,17 @@ const UserProfile: React.FC = () => {
           <input
             type="email"
             id="email"
-            value={email}
+            value={currentUser?.email || ''}
             readOnly
             className="w-full px-3 py-2 mt-1 border rounded shadow-sm bg-gray-100 cursor-not-allowed"
           />
         </div>
         <button type="submit" className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700">
           Update Profile
-        </button>
-      </form>
-    </div>
-  );
+      </button>
+    </form>
+</div>
+);
 };
 
 export default UserProfile;

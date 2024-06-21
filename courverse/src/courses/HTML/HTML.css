@@ -1,0 +1,95 @@
+/* HTML.css */
+
+/* General course container styling */
+.course-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  /* Header styling */
+  header {
+    background-color: #2d3748; /* Tailwind bg-gray-800 */
+    color: #ffffff; /* Tailwind text-white */
+    padding: 1rem; /* Tailwind p-4 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  header .flex.items-center img {
+    height: 2rem; /* Tailwind h-8 */
+    width: 2rem; /* Tailwind w-8 */
+    margin-right: 0.5rem; /* Tailwind mr-2 */
+  }
+  
+  header .flex.items-center h1 {
+    font-size: 1.25rem; /* Tailwind text-xl */
+    font-weight: 700; /* Tailwind font-bold */
+  }
+  
+  header .flex.items-center p {
+    margin-left: 1rem; /* Tailwind ml-4 */
+  }
+  
+  /* Progress bar styling */
+  .progress-bar {
+    background-color: #4a5568; /* Tailwind bg-gray-700 */
+    border-radius: 9999px; /* Tailwind rounded-full */
+    height: 1rem; /* Tailwind h-4 */
+    width: 16rem; /* Tailwind w-64 */
+    margin-right: 1rem; /* Tailwind mr-4 */
+  }
+  
+  .progress-bar div {
+    background-color: #4299e1; /* Tailwind bg-blue-500 */
+    height: 1rem; /* Tailwind h-4 */
+    border-radius: 9999px; /* Tailwind rounded-full */
+  }
+  
+  /* Navigation styling */
+  nav {
+    background-color: #edf2f7; /* Tailwind bg-gray-200 */
+    padding: 1rem; /* Tailwind p-4 */
+  }
+  
+  .lesson-list {
+    list-style-type: none; /* Remove default list style */
+    padding: 0; /* Remove default padding */
+  }
+  
+  .lesson-list li {
+    padding: 0.5rem; /* Tailwind p-2 */
+    cursor: pointer; /* Tailwind cursor-pointer */
+  }
+  
+  .lesson-list li.font-bold {
+    font-weight: 700; /* Tailwind font-bold */
+  }
+  
+  /* Main content styling */
+  main {
+    padding: 1rem; /* Tailwind p-4 */
+    flex: 1; /* Allow main to grow and fill the available space */
+  }
+  
+  /* Button styling */
+  button {
+    padding: 0.5rem; /* Tailwind p-2 */
+    border-radius: 0.25rem; /* Tailwind rounded */
+    color: #ffffff; /* Tailwind text-white */
+  }
+  
+  button.bg-gray-500 {
+    background-color: #a0aec0; /* Tailwind bg-gray-500 */
+  }
+  
+  button.bg-blue-500 {
+    background-color: #4299e1; /* Tailwind bg-blue-500 */
+  }
+  
+  button:disabled {
+    background-color: #cbd5e0; /* Tailwind bg-gray-400 */
+    cursor: not-allowed; /* Tailwind cursor-not-allowed */
+  }
+  

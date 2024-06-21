@@ -1,0 +1,44 @@
+/* development.css */
+
+/* General styling for the development content container */
+.development-content {
+    padding: 2rem; /* Tailwind: p-8 */
+    background-color: #f7fafc; /* Tailwind: bg-gray-100 */
+    color: #2d3748; /* Tailwind: text-gray-800 */
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+  }
+  
+  /* Heading styling */
+  .development-content h1 {
+    font-size: 2rem; /* Tailwind: text-2xl */
+    font-weight: 700; /* Tailwind: font-bold */
+    margin-bottom: 1rem; /* Tailwind: mb-4 */
+    color: #2c5282; /* Tailwind: text-blue-800 */
+  }
+  
+  /* Paragraph styling */
+  .development-content p {
+    margin-bottom: 1rem; /* Tailwind: mb-4 */
+  }
+  
+  /* Code styling */
+  .development-content code {
+    background-color: #edf2f7; /* Tailwind: bg-gray-200 */
+    padding: 0.2rem 0.4rem; /* Tailwind: px-2 py-1 */
+    border-radius: 0.25rem; /* Tailwind: rounded */
+    font-family: 'Courier New', Courier, monospace;
+  }
+  
+  /* List styling */
+  .development-content ul {
+    list-style-type: disc; /* Use disc for list style */
+    padding-left: 2rem; /* Tailwind: pl-8 */
+    margin-top: 1rem; /* Tailwind: mt-4 */
+  }
+  
+  /* List item styling */
+  .development-content ul li {
+    margin-bottom: 0.5rem; /* Tailwind: mb-2 */
+  }
+  

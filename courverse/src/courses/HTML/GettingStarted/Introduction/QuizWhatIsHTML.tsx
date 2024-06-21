@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import './styles/developmentquiz.css';
+import './styles/whatishtmlquiz.css';
 
-const DevelopmentQuiz: React.FC = () => {
+const WhatIsHTMLQuiz: React.FC = () => {
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
     const handleSubmit = () => {
-        if (selectedAnswer === 'HTML5') {
+        if (selectedAnswer === 'Markup Language') {
             setIsCorrect(true);
         } else {
             setIsCorrect(false);
@@ -15,50 +15,50 @@ const DevelopmentQuiz: React.FC = () => {
 
     return (
         <div>
-            <h2>Which is the latest version of HTML?</h2>
+            <h2>What is HTML?</h2>
             <form onSubmit={(e) => e.preventDefault()}>
                 <div>
                     <label>
                         <input 
                             type="radio" 
-                            value="HTML6.2" 
-                            checked={selectedAnswer === 'HTML6.2'}
-                            onChange={() => setSelectedAnswer('HTML6.2')} 
+                            value="Markup Language" 
+                            checked={selectedAnswer === 'Markup Language'}
+                            onChange={() => setSelectedAnswer('Markup Language')} 
                         />
-                        HTML6.2
+                        Markup Language
                     </label>
                 </div>
                 <div>
                     <label>
                         <input 
                             type="radio" 
-                            value="HTML5" 
-                            checked={selectedAnswer === 'HTML5'}
-                            onChange={() => setSelectedAnswer('HTML5')} 
+                            value="Machine Language" 
+                            checked={selectedAnswer === 'Machine Language'}
+                            onChange={() => setSelectedAnswer('Machine Language')} 
                         />
-                        HTML5
+                        Machine Language
                     </label>
                 </div>
                 <div>
                     <label>
                         <input 
                             type="radio" 
-                            value="HTML 6.0" 
-                            checked={selectedAnswer === 'HTML 6.0'}
-                            onChange={() => setSelectedAnswer('HTML 6.0')} 
+                            value="Programming Language" 
+                            checked={selectedAnswer === 'Programming Language'}
+                            onChange={() => setSelectedAnswer('Programming Language')} 
                         />
-                        HTML 6.0
+                        Programming Language
                     </label>
                 </div>
                 <div>
                     <label>
                         <input 
                             type="radio" 
-                            value="HTML 4" 
-                            checked={selectedAnswer === 'HTML 4'}
-                            onChange={() => setSelectedAnswer('HTML 4')} 
+                            value="Scripting Language" 
+                            checked={selectedAnswer === 'Scripting Language'}
+                            onChange={() => setSelectedAnswer('Scripting Language')} 
                         />
-                        HTML 4
+                        Scripting Language
                     </label>
                 </div>
                 <button type="submit" onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mt-4">
@@ -67,11 +67,11 @@ const DevelopmentQuiz: React.FC = () => {
             </form>
             {isCorrect !== null && (
                 <div className={`mt-4 p-2 ${isCorrect ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-                    {isCorrect ? 'Correct!' : 'Incorrect. The correct answer is "HTML5".'}
+                    {isCorrect ? 'Correct!' : 'Incorrect. The correct answer is "Markup Language".'}
                 </div>
             )}
         </div>
     );
 };
 
-export default DevelopmentQuiz;
+export default WhatIsHTMLQuiz;

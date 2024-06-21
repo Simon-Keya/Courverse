@@ -1,0 +1,60 @@
+.lesson-content {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .lesson-content h1 {
+    font-size: 2em;
+    margin-bottom: 0.5em;
+    color: #4a90e2;
+  }
+  
+  .lesson-content h2 {
+    font-size: 1.5em;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    color: #4a90e2;
+  }
+  
+  .lesson-content p {
+    margin-bottom: 1em;
+  }
+  
+  .lesson-content ul {
+    margin-bottom: 1em;
+    padding-left: 20px;
+  }
+  
+  .lesson-content ul li {
+    margin-bottom: 0.5em;
+  }
+  
+  .lesson-content ul li strong {
+    color: #333;
+  }
+  
+  .lesson-content code {
+    background-color: #e8e8e8;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  @media (max-width: 768px) {
+    .lesson-content {
+      padding: 10px;
+    }
+  
+    .lesson-content h1 {
+      font-size: 1.5em;
+    }
+  
+    .lesson-content h2 {
+      font-size: 1.2em;
+    }
+  }
+  

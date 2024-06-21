@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import CourseContent from './CourseContent';
 import '../styles/Course/CourseDetail.css';
+import HTMLCourse from './HTML/HTML'; // Adjust the path as needed
+
+const courses = {
+  html: {
+    title: 'HTML Course',
+    description: 'Learn the basics of HTML and build the foundation for web development.',
+    component: HTMLCourse,
+  },
+  // Add other courses here as needed
+};
 
 const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const [course, setCourse] = useState<any>(null);
-
-  useEffect(() => {
-    // Fetch course details from the API
-    axios.get(`/api/courses/${courseId}`).then((response) => {
-      setCourse(response.data);
-    });
-  }, [courseId]);
+  const [course] = useState(courses[courseId]);
 
   return (
     <div className="container mx-auto mt-8">
@@ -21,7 +22,7 @@ const CourseDetail: React.FC = () => {
         <>
           <h1 className="text-3xl font-bold">{course.title}</h1>
           <p className="mt-4">{course.description}</p>
-          <CourseContent lessons={course.lessons} />
+          <course.component />
         </>
       ) : (
         <p>Loading...</p>

@@ -30,7 +30,7 @@ const ForgotPassword = () => {
       } else {
         setMessage("Failed to send reset link. Please try again.");
       }
-    } catch (error) {
+    } catch {
       setMessage("An error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -45,7 +45,7 @@ const ForgotPassword = () => {
             Forgot your password?
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we willl send you a link to reset your password.
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

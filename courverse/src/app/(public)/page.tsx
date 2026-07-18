@@ -1,606 +1,221 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-
 import {
-  ArrowRight,
-  BookOpen,
-  Search,
-  Sparkles,
-  PlayCircle,
-  Award,
-  Users,
+  Search, ArrowRight, Star, Code2, BarChart3, Palette, Briefcase,
+  Smartphone, Sparkles, Flame, Trophy, Award,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CourseCard } from "@/components/course/CourseCard";
+import { categories, courses, publishers, testimonials } from "@/data/mock";
 
-export const metadata: Metadata = {
-  title: "Courverse | Learn Without Limits",
-  description:
-    "Master new skills through world-class courses, challenges and certificates.",
+const categoryIcons: Record<string, typeof Code2> = {
+  Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles,
 };
 
-export default function HomePage() {
+export default function LandingPage() {
+  const featured = courses.slice(0, 3);
+
   return (
-    <div className="overflow-hidden">
-
-      {/* Background */}
-
-      <section className="relative">
-
-        <div className="absolute inset-0 -z-10">
-
-          <div className="absolute left-0 top-0 h-[700px] w-[700px] rounded-full bg-emerald-400/20 blur-3xl" />
-
-          <div className="absolute right-0 top-32 h-[600px] w-[600px] rounded-full bg-sky-400/20 blur-3xl" />
-
-          <div className="absolute bottom-0 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-yellow-300/20 blur-3xl" />
-
-        </div>
-
-        <div className="container mx-auto px-6">
-
-          <div className="grid min-h-[92vh] items-center gap-20 lg:grid-cols-2">
-
-            {/* LEFT */}
-
-            <div>
-
-              <div className="mb-8 inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2">
-
-                <Sparkles className="mr-2 h-4 w-4 text-emerald-600" />
-
-                <span className="text-sm font-medium">
-                  Trusted by 50,000+ learners
-                </span>
-
-              </div>
-
-              <h1 className="text-5xl font-black leading-tight md:text-7xl">
-
-                Learn
-                <span className="text-emerald-600"> Smarter</span>
-
-                <br />
-
-                Grow
-
-                <span className="text-sky-600"> Faster</span>
-
-              </h1>
-
-              <p className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">
-
-                Courverse combines modern courses, interactive quizzes,
-                achievements, certificates and personalized learning paths
-                to help you master the skills employers actually need.
-
-              </p>
-
-              {/* SEARCH */}
-
-              <div className="mt-10 flex flex-col gap-4 rounded-3xl border bg-background p-4 shadow-xl lg:flex-row">
-
-                <div className="relative flex-1">
-
-                  <Search className="absolute left-4 top-4 h-5 w-5 text-muted-foreground" />
-
-                  <Input
-                    placeholder="Search for courses..."
-                    className="h-14 pl-12 text-base"
-                  />
-
-                </div>
-
-                <Button size="lg" className="h-14 px-10">
-
-                  Search
-
-                </Button>
-
-              </div>
-
-              {/* CTA */}
-
-              <div className="mt-10 flex flex-wrap gap-5">
-
-                <Button size="lg">
-
-                  Explore Courses
-
-                  <ArrowRight className="ml-2 h-5 w-5" />
-
-                </Button>
-
-                <Button variant="outline" size="lg">
-
-                  <PlayCircle className="mr-2 h-5 w-5" />
-
-                  Watch Demo
-
-                </Button>
-
-              </div>
-
-              {/* STATS */}
-
-              <div className="mt-16 grid grid-cols-3 gap-8">
-
-                <div>
-
-                  <div className="text-4xl font-black text-emerald-600">
-                    500+
-                  </div>
-
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Premium Courses
-                  </p>
-
-                </div>
-
-                <div>
-
-                  <div className="text-4xl font-black text-sky-600">
-                    50K+
-                  </div>
-
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Students
-                  </p>
-
-                </div>
-
-                <div>
-
-                  <div className="text-4xl font-black text-yellow-500">
-                    120+
-                  </div>
-
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Expert Publishers
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* RIGHT */}
-
-            <div className="relative">
-
-              <div className="relative overflow-hidden rounded-[40px] border bg-card shadow-2xl">
-
-                <Image
-                  src="/images/hero/dashboard.webp"
-                  alt="Courverse Dashboard"
-                  width={900}
-                  height={900}
-                  priority
-                  className="w-full"
-                />
-
-              </div>
-
-              {/* Floating Cards */}
-
-              <div className="absolute -left-8 top-12 rounded-3xl border bg-background p-5 shadow-xl">
-
-                <div className="flex items-center gap-4">
-
-                  <div className="rounded-xl bg-emerald-500/10 p-3">
-
-                    <Award className="h-7 w-7 text-emerald-600" />
-
-                  </div>
-
-                  <div>
-
-                    <h4 className="font-bold">
-                      Certificate Earned
-                    </h4>
-
-                    <p className="text-sm text-muted-foreground">
-                      React Masterclass
-                    </p>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div className="absolute -right-6 bottom-20 rounded-3xl border bg-background p-5 shadow-xl">
-
-                <div className="flex items-center gap-4">
-
-                  <div className="rounded-xl bg-sky-500/10 p-3">
-
-                    <BookOpen className="h-7 w-7 text-sky-600" />
-
-                  </div>
-
-                  <div>
-
-                    <div className="font-bold">
-                      Continue Learning
-                    </div>
-
-                    <div className="text-sm text-muted-foreground">
-                      TypeScript Advanced
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div className="absolute left-24 bottom-0 rounded-3xl border bg-background p-5 shadow-xl">
-
-                <div className="flex items-center gap-4">
-
-                  <div className="rounded-xl bg-yellow-500/10 p-3">
-
-                    <Users className="h-7 w-7 text-yellow-600" />
-
-                  </div>
-
-                  <div>
-
-                    <div className="font-bold">
-                      Active Community
-                    </div>
-
-                    <div className="text-sm text-muted-foreground">
-                      18,000 Online
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-    </div>
-  );
-}
-
-      {/* ==========================================
-          FEATURED CATEGORIES
-      =========================================== */}
-
-      <section className="py-24">
-
-        <div className="container mx-auto px-6">
-
-          <div className="mb-14 flex items-end justify-between">
-
-            <div>
-
-              <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
-                Explore
-              </span>
-
-              <h2 className="mt-5 text-4xl font-black">
-                Browse Categories
-              </h2>
-
-              <p className="mt-4 max-w-2xl text-muted-foreground">
-                Learn from curated learning paths created by experts.
-              </p>
-
-            </div>
-
-            <Button variant="outline">
-
-              View All
-
-            </Button>
-
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-
-            {[
-              {
-                title: "Development",
-                courses: 142,
-                color: "bg-emerald-500",
-                icon: <BookOpen className="h-7 w-7 text-white" />,
-              },
-              {
-                title: "Design",
-                courses: 64,
-                color: "bg-sky-500",
-                icon: <Sparkles className="h-7 w-7 text-white" />,
-              },
-              {
-                title: "Business",
-                courses: 81,
-                color: "bg-yellow-500",
-                icon: <Award className="h-7 w-7 text-white" />,
-              },
-              {
-                title: "Marketing",
-                courses: 59,
-                color: "bg-violet-500",
-                icon: <Users className="h-7 w-7 text-white" />,
-              },
-            ].map((category) => (
-
-              <Link
-                key={category.title}
-                href="/categories"
-                className="group rounded-3xl border bg-card p-8 transition-all duration-300 hover:-translate-y-2 hover:border-emerald-500 hover:shadow-2xl"
-              >
-
-                <div
-                  className={`mb-6 flex h-16 w-16 items-center justify-center rounded-2xl ${category.color}`}
-                >
-                  {category.icon}
-                </div>
-
-                <h3 className="text-xl font-bold">
-                  {category.title}
-                </h3>
-
-                <p className="mt-2 text-muted-foreground">
-                  {category.courses} Courses
-                </p>
-
-              </Link>
-
-            ))}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ==========================================
-          PLATFORM STATS
-      =========================================== */}
-
-      <section className="bg-gradient-to-r from-emerald-600 to-green-700 py-24 text-white">
-
-        <div className="container mx-auto px-6">
-
-          <div className="grid gap-12 text-center md:grid-cols-4">
-
-            {[
-              ["50,000+", "Students"],
-              ["500+", "Courses"],
-              ["120+", "Publishers"],
-              ["98%", "Completion Rate"],
-            ].map(([number, label]) => (
-
-              <div key={label}>
-
-                <h3 className="text-6xl font-black">
-                  {number}
-                </h3>
-
-                <p className="mt-4 text-lg text-white/80">
-                  {label}
-                </p>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ==========================================
-          FEATURED COURSES
-      =========================================== */}
-
-      <section className="py-28">
-
-        <div className="container mx-auto px-6">
-
-          <div className="mb-16 flex items-end justify-between">
-
-            <div>
-
-              <span className="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-700">
-                Popular Courses
-              </span>
-
-              <h2 className="mt-5 text-5xl font-black">
-
-                Featured Learning
-
-              </h2>
-
-            </div>
-
-            <Button>
-
-              Browse Courses
-
-            </Button>
-
-          </div>
-
-          <div className="grid gap-8 lg:grid-cols-3">
-
-            {[1,2,3,4,5,6].map((course)=>(
-              
-              <div
-                key={course}
-                className="overflow-hidden rounded-3xl border bg-card transition hover:-translate-y-2 hover:shadow-2xl"
-              >
-
-                <Image
-                  src={`/images/courses/course-${(course%3)+1}.jpg`}
-                  alt=""
-                  width={600}
-                  height={400}
-                  className="aspect-video object-cover"
-                />
-
-                <div className="p-7">
-
-                  <div className="mb-4 flex items-center justify-between">
-
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
-
-                      Development
-
-                    </span>
-
-                    <span className="font-bold text-yellow-500">
-
-                      ★ 4.9
-
-                    </span>
-
-                  </div>
-
-                  <h3 className="text-2xl font-bold">
-
-                    Complete Full Stack Development
-
-                  </h3>
-
-                  <p className="mt-4 text-muted-foreground">
-
-                    Build real-world applications using React,
-                    Next.js, NestJS, PostgreSQL and Docker.
-
-                  </p>
-
-                  <div className="mt-8 flex items-center justify-between">
-
-                    <div>
-
-                      <p className="text-sm text-muted-foreground">
-
-                        Simon Keya
-
-                      </p>
-
-                      <p className="font-bold">
-
-                        Senior Instructor
-
-                      </p>
-
-                    </div>
-
-                    <Button>
-
-                      Enroll
-
-                    </Button>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ==========================================
-          WHY COURVERSE
-      =========================================== */}
-
-      <section className="bg-muted/30 py-28">
-
-        <div className="container mx-auto px-6">
-
-          <div className="mx-auto max-w-4xl text-center">
-
-            <h2 className="text-5xl font-black">
-
-              Why Learn With Courverse?
-
-            </h2>
-
-            <p className="mt-6 text-lg text-muted-foreground">
-
-              Built for modern learners. Every feature exists to help
-              you finish courses instead of abandoning them.
-
+    <>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-border bg-background-secondary">
+        <div className="container-page grid gap-12 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
+          <div className="animate-fade-up">
+            <span className="badge-pill bg-primary-light text-primary-hover">
+              <Sparkles className="h-3.5 w-3.5" /> New: gamified learning paths
+            </span>
+            <h1 className="mt-5 font-heading text-4xl font-bold leading-tight text-text sm:text-5xl">
+              Learn skills that actually stick.
+            </h1>
+            <p className="mt-4 max-w-md text-lg text-text-secondary">
+              Courses built by working practitioners, with progress tracking, rewards, and challenges that keep you coming back.
             </p>
 
+            <form className="mt-8 flex max-w-md items-center gap-2 rounded-input border border-border bg-white p-1.5 shadow-sm focus-within:border-primary">
+              <Search className="ml-2 h-5 w-5 shrink-0 text-text-secondary" />
+              <input
+                type="text"
+                placeholder="Search for React, Design, Data Science…"
+                className="w-full bg-transparent px-1 py-2 text-sm text-text placeholder:text-text-secondary focus:outline-none"
+              />
+              <Button size="sm" className="shrink-0">Search</Button>
+            </form>
+
+            <div className="mt-8 flex items-center gap-6">
+              <div>
+                <p className="font-heading text-2xl font-bold text-text">240K+</p>
+                <p className="text-xs text-text-secondary">Active learners</p>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div>
+                <p className="font-heading text-2xl font-bold text-text">1,200+</p>
+                <p className="text-xs text-text-secondary">Courses</p>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div>
+                <p className="font-heading text-2xl font-bold text-text">4.8/5</p>
+                <p className="text-xs text-text-secondary">Average rating</p>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-20 grid gap-8 lg:grid-cols-3">
+          {/* Progress preview card */}
+          <div className="relative mx-auto w-full max-w-sm animate-fade-up lg:ml-auto" style={{ animationDelay: "0.1s" }}>
+            <div className="card-surface p-6">
+              <p className="text-sm text-text-secondary">Hello Simon 👋</p>
+              <p className="mt-1 font-heading text-lg font-semibold text-text">Continue Learning</p>
 
-            {[
-              {
-                title:"Gamified Learning",
-                text:"XP, badges, streaks and challenges keep students engaged."
-              },
-              {
-                title:"Interactive Quizzes",
-                text:"Practice immediately after every lesson."
-              },
-              {
-                title:"Professional Certificates",
-                text:"Download verified certificates instantly."
-              },
-              {
-                title:"Community Discussions",
-                text:"Ask questions directly from publishers."
-              },
-              {
-                title:"AI Recommendations",
-                text:"Personalized learning paths."
-              },
-              {
-                title:"Real-time Progress",
-                text:"Track every milestone across devices."
-              }
-            ].map((item)=>(
-
-              <div
-                key={item.title}
-                className="rounded-3xl border bg-card p-8"
-              >
-
-                <h3 className="text-2xl font-bold">
-
-                  {item.title}
-
-                </h3>
-
-                <p className="mt-4 text-muted-foreground">
-
-                  {item.text}
-
-                </p>
-
+              <div className="mt-4">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-background-secondary">
+                  <div className="h-full w-[72%] rounded-full bg-progress-gradient" />
+                </div>
+                <p className="mt-1.5 text-xs font-semibold text-primary">72% complete</p>
               </div>
 
-            ))}
-
+              <div className="mt-5 grid grid-cols-3 gap-3">
+                <div className="rounded-card border border-border bg-orange-50 p-3 text-center">
+                  <Flame className="mx-auto h-5 w-5 text-challenge" />
+                  <p className="mt-1 text-xs font-semibold text-text">3 Lessons</p>
+                  <p className="text-[10px] text-text-secondary">Today's goal</p>
+                </div>
+                <div className="rounded-card border border-border bg-yellow-50 p-3 text-center">
+                  <Trophy className="mx-auto h-5 w-5 text-reward" />
+                  <p className="mt-1 text-xs font-semibold text-text">1,540 XP</p>
+                  <p className="text-[10px] text-text-secondary">Total earned</p>
+                </div>
+                <div className="rounded-card border border-border bg-primary-light p-3 text-center">
+                  <Award className="mx-auto h-5 w-5 text-primary" />
+                  <p className="mt-1 text-xs font-semibold text-text">Gold badge</p>
+                  <p className="text-[10px] text-text-secondary">Latest reward</p>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+      </section>
 
+      {/* Categories */}
+      <section className="container-page py-20">
+        <div className="flex items-end justify-between">
+          <div>
+            <h2 className="font-heading text-2xl font-bold text-text sm:text-3xl">Browse by category</h2>
+            <p className="mt-2 text-text-secondary">Find the right path for where you want to go next.</p>
+          </div>
+          <Link href="/categories" className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover sm:flex">
+            View all <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          {categories.map((cat) => {
+            const Icon = categoryIcons[cat.icon] ?? Code2;
+            return (
+              <Link
+                key={cat.id}
+                href={`/categories/${cat.slug}`}
+                className="card-surface flex flex-col items-center gap-2.5 p-5 text-center"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-light text-primary">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="text-sm font-semibold text-text">{cat.name}</span>
+                <span className="text-xs text-text-secondary">{cat.courseCount} courses</span>
+              </Link>
+            );
+          })}
+        </div>
       </section>
+
+      {/* Featured Courses */}
+      <section className="border-y border-border bg-background-secondary py-20">
+        <div className="container-page">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="font-heading text-2xl font-bold text-text sm:text-3xl">Featured courses</h2>
+              <p className="mt-2 text-text-secondary">Hand-picked by our editorial team this month.</p>
+            </div>
+            <Link href="/courses" className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover sm:flex">
+              Browse all courses <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Publisher highlights */}
+      <section className="container-page py-20">
+        <div className="flex items-end justify-between">
+          <div>
+            <h2 className="font-heading text-2xl font-bold text-text sm:text-3xl">Learn from the best</h2>
+            <p className="mt-2 text-text-secondary">Publishers who've taught hundreds of thousands of students.</p>
+          </div>
+          <Link href="/publishers" className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover sm:flex">
+            View all publishers <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {publishers.map((pub) => (
+            <Link key={pub.id} href={`/publishers/${pub.id}`} className="card-surface p-6 text-center">
+              <Image
+                src={pub.avatarUrl}
+                alt={pub.name}
+                width={64}
+                height={64}
+                className="mx-auto rounded-full"
+              />
+              <p className="mt-3 font-heading font-semibold text-text">{pub.name}</p>
+              <p className="mt-1 text-xs text-text-secondary">{pub.coursesCount} courses · {pub.studentsCount.toLocaleString()} students</p>
+              <div className="mt-2 flex items-center justify-center gap-1 text-sm">
+                <Star className="h-4 w-4 fill-reward text-reward" />
+                <span className="font-semibold text-text">{pub.rating}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="bg-background-secondary py-20">
+        <div className="container-page">
+          <h2 className="text-center font-heading text-2xl font-bold text-text sm:text-3xl">What learners say</h2>
+          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+            {testimonials.map((t) => (
+              <div key={t.id} className="card-surface p-6">
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-reward text-reward" />
+                  ))}
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-text">"{t.quote}"</p>
+                <div className="mt-5 flex items-center gap-3">
+                  <Image src={t.avatarUrl} alt={t.name} width={40} height={40} className="rounded-full" />
+                  <div>
+                    <p className="text-sm font-semibold text-text">{t.name}</p>
+                    <p className="text-xs text-text-secondary">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="container-page py-20">
+        <div className="card-surface flex flex-col items-center gap-4 bg-primary-light px-8 py-14 text-center">
+          <h2 className="font-heading text-2xl font-bold text-text sm:text-3xl">Ready to start learning?</h2>
+          <p className="max-w-md text-text-secondary">Join thousands of learners building real skills, one lesson at a time.</p>
+          <Link href="/register">
+            <Button size="lg">Get started for free</Button>
+          </Link>
+        </div>
+      </section>
+    </>
+  );
+}

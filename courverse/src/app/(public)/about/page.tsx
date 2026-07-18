@@ -1,119 +1,81 @@
-import { Metadata } from "next";
-import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  GraduationCap,
-  ShieldCheck,
-  Sparkles,
-  Users,
-} from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "About | Courverse",
-  description:
-    "Learn more about Courverse and our mission to make quality education accessible worldwide.",
-};
+import Image from "next/image";
+import { Target, Heart, Users, Rocket } from "lucide-react";
 
 const values = [
-  {
-    title: "Learn Anywhere",
-    description:
-      "Access world-class education from any device at your own pace.",
-    icon: BookOpen,
-  },
-  {
-    title: "Trusted Publishers",
-    description:
-      "Courses created by verified educators and industry professionals.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Community Driven",
-    description:
-      "Join thousands of learners sharing knowledge every day.",
-    icon: Users,
-  },
+  { icon: Target, title: "Outcomes over hours", body: "We measure success by skills gained, not video minutes watched." },
+  { icon: Heart, title: "Made for learners", body: "Every feature is designed around what keeps people coming back to finish." },
+  { icon: Users, title: "Publisher-first", body: "We build tools that make it easy for real practitioners to teach well." },
+  { icon: Rocket, title: "Ship quickly", body: "Small, well-crafted improvements, shipped constantly." },
+];
+
+const stats = [
+  { label: "Active learners", value: "240K+" },
+  { label: "Courses published", value: "1,200+" },
+  { label: "Countries reached", value: "80+" },
+  { label: "Certificates issued", value: "95K+" },
 ];
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-7xl px-6 py-20">
-
-      <section className="text-center">
-
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-5 py-2 text-primary">
-
-          <Sparkles className="h-4 w-4" />
-
-          About Courverse
-
+    <>
+      <section className="border-b border-border bg-background-secondary py-20">
+        <div className="container-page max-w-3xl text-center">
+          <h1 className="font-heading text-4xl font-bold text-text sm:text-5xl">
+            We're building the place people actually finish learning.
+          </h1>
+          <p className="mt-5 text-lg text-text-secondary">
+            Courverse started with a simple observation: most learners never finish their courses. So we built a platform around progress, rewards, and real accountability.
+          </p>
         </div>
-
-        <h1 className="mt-6 text-5xl font-bold">
-          Education Designed
-          <span className="text-primary"> For Everyone</span>
-        </h1>
-
-        <p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground">
-          Courverse combines structured learning, real-world projects,
-          gamification and expert instruction into one modern education
-          platform.
-        </p>
-
       </section>
 
-      <section className="mt-24 grid gap-8 md:grid-cols-3">
-
-        {values.map((item) => (
-          <div
-            key={item.title}
-            className="rounded-3xl border bg-card p-8 shadow-sm"
-          >
-            <item.icon className="mb-6 h-10 w-10 text-primary" />
-
-            <h2 className="mb-3 text-2xl font-semibold">
-              {item.title}
-            </h2>
-
-            <p className="text-muted-foreground">
-              {item.description}
-            </p>
+      <section className="container-page py-20">
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-card border border-border">
+            <Image
+              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop"
+              alt="Team collaborating"
+              fill
+              className="object-cover"
+            />
           </div>
-        ))}
-
-      </section>
-
-      <section className="mt-24 rounded-3xl bg-primary px-12 py-16 text-primary-foreground">
-
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
           <div>
-
-            <h2 className="text-4xl font-bold">
-              Ready to Start Learning?
-            </h2>
-
-            <p className="mt-4 max-w-xl opacity-90">
-              Explore thousands of courses built to help you master new
-              skills and advance your career.
+            <h2 className="font-heading text-2xl font-bold text-text sm:text-3xl">Our story</h2>
+            <p className="mt-4 text-text-secondary">
+              We were engineers, designers, and educators who kept abandoning our own online courses halfway through. The content wasn't the problem — the experience was.
             </p>
-
+            <p className="mt-4 text-text-secondary">
+              So we set out to build a learning platform with the polish of the best software products we use every day, paired with gamification that actually respects your time instead of gimmicks that waste it.
+            </p>
           </div>
-
-          <Link
-            href="/courses"
-            className="inline-flex items-center gap-3 rounded-xl bg-white px-6 py-4 font-semibold text-primary transition hover:scale-105"
-          >
-            Browse Courses
-
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-
         </div>
-
       </section>
 
-    </main>
+      <section className="border-y border-border bg-background-secondary py-16">
+        <div className="container-page grid grid-cols-2 gap-8 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center">
+              <p className="font-heading text-3xl font-bold text-primary">{s.value}</p>
+              <p className="mt-1 text-sm text-text-secondary">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container-page py-20">
+        <h2 className="text-center font-heading text-2xl font-bold text-text sm:text-3xl">What we believe</h2>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {values.map((v) => (
+            <div key={v.title} className="card-surface p-6">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-light text-primary">
+                <v.icon className="h-5 w-5" />
+              </span>
+              <h3 className="mt-4 font-heading font-semibold text-text">{v.title}</h3>
+              <p className="mt-2 text-sm text-text-secondary">{v.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }

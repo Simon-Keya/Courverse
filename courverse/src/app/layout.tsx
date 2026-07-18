@@ -1,22 +1,19 @@
-import "./globals.css";
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { Inter, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import "./globals.css";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const body = Inter({ subsets: ["latin"], variable: "--font-body" });
+const heading = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-heading" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Courverse",
-  description: "Modern Learning Platform",
+  title: "Courverse — Learn skills that stick",
+  description: "An online learning platform for learners, publishers, and teams.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={`${body.variable} ${heading.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

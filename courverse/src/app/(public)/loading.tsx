@@ -1,73 +1,21 @@
-import {
-  BookOpen,
-  GraduationCap,
-  LoaderCircle,
-  Sparkles,
-} from "lucide-react";
-
 export default function PublicLoading() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-8">
-
-        <div className="relative">
-          <div className="absolute inset-0 animate-ping rounded-full bg-primary/15" />
-
-          <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl">
-
-            <GraduationCap className="h-12 w-12" />
-
-          </div>
-        </div>
-
-        <div className="space-y-3 text-center">
-
-          <h2 className="text-3xl font-bold">
-            Loading Courverse...
-          </h2>
-
-          <p className="max-w-md text-muted-foreground">
-            Preparing your personalized learning experience.
-          </p>
-
-        </div>
-
-        <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
-
-        <div className="grid grid-cols-3 gap-6 pt-8">
-
-          <div className="flex flex-col items-center gap-2">
-
-            <BookOpen className="h-7 w-7 text-emerald-500 animate-bounce" />
-
-            <div className="h-2 w-20 rounded-full bg-muted animate-pulse" />
-
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-
-            <GraduationCap
-              className="h-7 w-7 text-blue-500 animate-bounce"
-              style={{ animationDelay: ".2s" }}
-            />
-
-            <div className="h-2 w-20 rounded-full bg-muted animate-pulse" />
-
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-
-            <Sparkles
-              className="h-7 w-7 text-yellow-500 animate-bounce"
-              style={{ animationDelay: ".4s" }}
-            />
-
-            <div className="h-2 w-20 rounded-full bg-muted animate-pulse" />
-
-          </div>
-
+    <div className="container-page py-20">
+      <div className="animate-pulse space-y-8">
+        <div className="h-8 w-64 rounded-md bg-background-secondary" />
+        <div className="h-4 w-full max-w-md rounded-md bg-background-secondary" />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-card border border-border">
+              <div className="aspect-video w-full rounded-t-card bg-background-secondary" />
+              <div className="space-y-2 p-5">
+                <div className="h-4 w-3/4 rounded bg-background-secondary" />
+                <div className="h-4 w-1/2 rounded bg-background-secondary" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

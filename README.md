@@ -118,6 +118,43 @@ Most real products give the course player its own full-bleed layout —
 happy to add a `CoursePlayerLayout` if you'd rather it break out of the
 dashboard chrome.
 
+## publisher and admin routes (plain segments, not route groups)
+
+```
+src/app/publisher/layout.tsx
+src/app/publisher/dashboard/page.tsx
+src/app/publisher/analytics/page.tsx
+src/app/publisher/courses/page.tsx
+src/app/publisher/quizzes/page.tsx
+src/app/publisher/students/page.tsx
+src/app/publisher/earnings/page.tsx
+src/app/publisher/certificates/page.tsx
+src/app/publisher/settings/page.tsx
+
+src/app/admin/layout.tsx
+src/app/admin/dashboard/page.tsx
+src/app/admin/users/page.tsx
+src/app/admin/courses/page.tsx
+src/app/admin/publishers/page.tsx
+src/app/admin/categories/page.tsx
+src/app/admin/rewards/page.tsx
+src/app/admin/reports/page.tsx
+src/app/admin/settings/page.tsx
+src/app/admin/logs/page.tsx
+
+src/components/layout/DashboardSidebar.tsx   ← generic, shared by publisher + admin
+src/components/layout/DashboardTopbar.tsx    ← generic, shared by publisher + admin
+src/components/charts/BarChart.tsx           ← CSS-only bar chart, no charting lib added
+src/data/publisher-mock.ts
+src/data/admin-mock.ts
+```
+
+**Design decision:** rather than writing near-identical `PublisherSidebar`/`AdminSidebar` components (like the learner one), these two sections share one `DashboardSidebar`/`DashboardTopbar` pair that takes `navItems` and a `roleLabel` as props. Same visual language, less duplication. If you'd rather each role have its own fully independent component (e.g. because they'll diverge a lot later), say so and I'll split them.
+
+Also worth knowing: no charting library (recharts, etc.) was added to `package.json` — `BarChart.tsx` is a small CSS/flexbox component used for analytics/earnings/revenue trend. It's fine for this mock-data stage; swap it for `recharts` (already listed as your preferred stack) once you're plotting real time-series data with tooltips, zoom, etc.
+
+Both sections are gated visually only (sidebar nav + role label) — there's no actual role-based route protection yet. That belongs in `middleware.ts` / your auth guards once the real auth flow is wired up, not in these page components.
+
 ## Run it
 
 ```bash

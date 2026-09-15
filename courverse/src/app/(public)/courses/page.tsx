@@ -1,47 +1,86 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Search, LayoutGrid, List, Star, SlidersHorizontal } from "lucide-react";
-import { courses, categories } from "@/data/mock";
+import { Search, LayoutGrid, List, SlidersHorizontal, Loader2 } from "lucide-react";
+import { courses as mockCourses, categories as mockCategories } from "@/data/mock";
 import { CourseCard } from "@/components/course/CourseCard";
-import { Badge } from "@/components/ui/badge";
+import { useCourses } from "@/hooks/use-courses";
+import { normalizeCourse, type Course } from "@/types/course";
 
 const levels = ["All levels", "Beginner", "Intermediate", "Advanced"] as const;
 
 export default function CoursesPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All categories");
-  const [level, setLevel] = useState<typeof levels[number]>("All levels");
+  const [level, setLevel] = useState<(typeof levels)[number]>("All levels");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [page, setPage] = useState(1);
+
+  const difficultyMap: Record<string, string | undefined> = {
+    Beginner: "beginner",
+    Intermediate: "intermediate",
+    Advanced: "advanced",
+  };
+
+  const { data, isLoading, isError } = useCourses({
+    page,
+    limit: 12,
+    search: query || undefined,
+    difficulty: level !== "All levels" ? difficultyMap[level] : undefined,
+    sort: "newest",
+  });
+
+  // Prefer live data; fall back to mock when API is unavailable
+  const liveCourses: Course[] = useMemo(() => {
+    if (data?.data?.length) {
+      return data.data.map(normalizeCourse);
+    }
+    return [];
+  }, [data]);
+
+  const usingMock = isError || (!isLoading && liveCourses.length === 0);
+  const sourceCourses = usingMock ? mockCourses : liveCourses;
+  const categories = mockCategories; // categories API can be wired later
 
   const filtered = useMemo(() => {
-    return courses.filter((c) => {
-      const matchesQuery = c.title.toLowerCase().includes(query.toLowerCase());
-      const matchesCategory = category === "All categories" || c.category === category;
+    if (!usingMock) return sourceCourses; // server already filtered
+    return sourceCourses.filter((c) => {
+      const matchesQuery =
+        !query ||
+        c.title.toLowerCase().includes(query.toLowerCase()) ||
+        c.description?.toLowerCase().includes(query.toLowerCase());
+      const catName = typeof c.category === "string" ? c.category : c.category?.name;
+      const matchesCategory = category === "All categories" || catName === category;
       const matchesLevel = level === "All levels" || c.level === level;
       return matchesQuery && matchesCategory && matchesLevel;
     });
-  }, [query, category, level]);
+  }, [sourceCourses, query, category, level, usingMock]);
+
+  const total = usingMock ? filtered.length : data?.meta?.total ?? filtered.length;
 
   return (
     <>
       <section className="border-b border-border bg-background-secondary py-14">
         <div className="container-page">
-          <h1 className="font-heading text-4xl font-bold text-text sm:text-5xl">Browse courses</h1>
+          <h1 className="font-heading text-4xl font-bold text-text sm:text-5xl">
+            Browse courses
+          </h1>
           <p className="mt-3 max-w-xl text-lg text-text-secondary">
-            {courses.length} courses across web development, design, data, and more.
+            Discover high-quality courses across web development, design, data, and more.
           </p>
 
           <div className="mt-6 flex items-center gap-2 rounded-input border border-border bg-white p-1.5 shadow-sm focus-within:border-primary sm:max-w-md">
             <Search className="ml-2 h-5 w-5 shrink-0 text-text-secondary" />
             <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              type="search"
               placeholder="Search courses…"
-              className="w-full bg-transparent px-1 py-2 text-sm text-text placeholder:text-text-secondary focus:outline-none"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
+              className="w-full bg-transparent px-2 py-2 text-sm text-text placeholder:text-text-secondary focus:outline-none"
+              aria-label="Search courses"
             />
           </div>
         </div>
@@ -57,6 +96,7 @@ export default function CoursesPage() {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="rounded-input border border-border bg-white px-3 py-2 text-sm text-text focus:border-primary focus:outline-none"
+              aria-label="Filter by category"
             >
               <option>All categories</option>
               {categories.map((c) => (
@@ -65,8 +105,9 @@ export default function CoursesPage() {
             </select>
             <select
               value={level}
-              onChange={(e) => setLevel(e.target.value as typeof levels[number])}
+              onChange={(e) => setLevel(e.target.value as (typeof levels)[number])}
               className="rounded-input border border-border bg-white px-3 py-2 text-sm text-text focus:border-primary focus:outline-none"
+              aria-label="Filter by level"
             >
               {levels.map((l) => (
                 <option key={l}>{l}</option>
@@ -78,65 +119,88 @@ export default function CoursesPage() {
             <button
               aria-label="Grid view"
               onClick={() => setView("grid")}
-              className={`rounded-btn p-1.5 transition-colors ${view === "grid" ? "bg-primary-light text-primary" : "text-text-secondary hover:text-text"}`}
+              className={`rounded-btn p-1.5 transition-colors ${
+                view === "grid" ? "bg-primary-light text-primary" : "text-text-secondary hover:text-text"
+              }`}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               aria-label="List view"
               onClick={() => setView("list")}
-              className={`rounded-btn p-1.5 transition-colors ${view === "list" ? "bg-primary-light text-primary" : "text-text-secondary hover:text-text"}`}
+              className={`rounded-btn p-1.5 transition-colors ${
+                view === "list" ? "bg-primary-light text-primary" : "text-text-secondary hover:text-text"
+              }`}
             >
               <List className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <p className="mt-6 text-sm text-text-secondary">{filtered.length} results</p>
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-sm text-text-secondary">
+            {isLoading ? "Loading…" : `${total} results`}
+            {usingMock && !isLoading && (
+              <span className="ml-2 text-xs text-amber-600">(demo data)</span>
+            )}
+          </p>
+        </div>
 
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="mt-16 flex flex-col items-center justify-center gap-3 py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-text-secondary">Loading courses…</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="mt-10 rounded-card border border-dashed border-border py-16 text-center">
             <p className="font-heading font-semibold text-text">No courses match your filters</p>
-            <p className="mt-1 text-sm text-text-secondary">Try a different search term or clear your filters.</p>
+            <p className="mt-1 text-sm text-text-secondary">
+              Try a different search term or clear your filters.
+            </p>
+            <button
+              onClick={() => {
+                setQuery("");
+                setCategory("All categories");
+                setLevel("All levels");
+              }}
+              className="mt-4 text-sm font-medium text-primary hover:underline"
+            >
+              Clear filters
+            </button>
           </div>
-        ) : view === "grid" ? (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        ) : (
+          <div
+            className={
+              view === "grid"
+                ? "mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                : "mt-8 flex flex-col gap-4"
+            }
+          >
             {filtered.map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
-        ) : (
-          <div className="mt-6 space-y-4">
-            {filtered.map((course) => (
-              <Link
-                key={course.id}
-                href={`/courses/${course.id}`}
-                className="card-surface flex flex-col gap-4 p-4 sm:flex-row sm:items-center"
-              >
-                <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-card sm:h-24 sm:w-40">
-                  <Image src={course.thumbnailUrl} alt={course.title} fill className="object-cover" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
-                    <span>{course.category}</span>
-                    <span aria-hidden>·</span>
-                    <span>{course.level}</span>
-                    {course.isPremium && <Badge variant="premium">Premium</Badge>}
-                  </div>
-                  <h3 className="mt-1 font-heading font-semibold text-text">{course.title}</h3>
-                  <p className="mt-1 line-clamp-1 text-sm text-text-secondary">{course.description}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:items-end">
-                  <span className="flex items-center gap-1 text-sm">
-                    <Star className="h-4 w-4 fill-reward text-reward" />
-                    <span className="font-semibold text-text">{course.rating}</span>
-                  </span>
-                  <span className="font-heading font-bold text-text">
-                    {course.price === 0 ? "Free" : `$${course.price}`}
-                  </span>
-                </div>
-              </Link>
-            ))}
+        )}
+
+        {!usingMock && data?.meta && data.meta.totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-center gap-2">
+            <button
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="rounded-btn border border-border px-4 py-2 text-sm disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-text-secondary">
+              Page {page} of {data.meta.totalPages}
+            </span>
+            <button
+              disabled={page >= data.meta.totalPages}
+              onClick={() => setPage((p) => p + 1)}
+              className="rounded-btn border border-border px-4 py-2 text-sm disabled:opacity-40"
+            >
+              Next
+            </button>
           </div>
         )}
       </section>

@@ -1,68 +1,100 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, Trophy, Info, Flame, CheckCircle2 } from "lucide-react";
-import { notificationsList as initialNotifications } from "@/data/mock";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Bell, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { notificationsApi } from "@/api/modules/notifications";
+import { useAuthStore } from "@/store/auth.store";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
-const typeIcons: Record<string, typeof Bell> = {
-  reward: Trophy,
-  info: Info,
-  challenge: Flame,
-  success: CheckCircle2,
-};
-
-const typeStyles: Record<string, string> = {
-  reward: "bg-yellow-50 text-reward",
-  info: "bg-blue-50 text-info",
-  challenge: "bg-orange-50 text-challenge",
-  success: "bg-primary-light text-primary",
-};
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const qc = useQueryClient();
 
-  const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  const markRead = (id: string) => setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const { data, isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => notificationsApi.list(),
+    enabled: isAuthenticated,
+    retry: 1,
+  });
+
+  const markAll = useMutation({
+    mutationFn: () => notificationsApi.markAllRead(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+
+  const markOne = useMutation({
+    mutationFn: (id: string) => notificationsApi.markRead(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container-page py-16 text-center">
+        <Bell className="mx-auto h-12 w-12 text-text-secondary" />
+        <h1 className="mt-4 font-heading text-2xl font-bold text-text">Notifications</h1>
+        <p className="mt-2 text-text-secondary">Log in to see notifications.</p>
+        <Link href="/login" className="mt-6 inline-block text-primary hover:underline">
+          Log in
+        </Link>
+      </div>
+    );
+  }
+
+  const items = data || [];
 
   return (
     <div className="container-page py-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-text">Notifications</h1>
-          <p className="mt-1 text-text-secondary">{unreadCount} unread</p>
+          <p className="mt-1 text-text-secondary">
+            {isLoading ? "Loading…" : `${items.length} notifications`}
+          </p>
         </div>
-        {unreadCount > 0 && (
-          <Button variant="secondary" size="sm" onClick={markAllRead}>Mark all as read</Button>
+        {items.some((n) => !n.isRead) && (
+          <Button size="sm" variant="secondary" onClick={() => markAll.mutate()}>
+            Mark all read
+          </Button>
         )}
       </div>
 
-      <div className="mt-6 card-surface divide-y divide-border">
-        {notifications.map((n) => {
-          const Icon = typeIcons[n.type] ?? Bell;
-          return (
-            <button
+      {isLoading ? (
+        <div className="mt-16 flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : items.length === 0 ? (
+        <div className="mt-10 rounded-card border border-dashed border-border py-16 text-center">
+          <p className="font-heading font-semibold text-text">You&apos;re all caught up</p>
+          <p className="mt-1 text-sm text-text-secondary">No notifications yet.</p>
+        </div>
+      ) : (
+        <ul className="mt-6 divide-y divide-border rounded-card border border-border bg-white">
+          {items.map((n) => (
+            <li
               key={n.id}
-              onClick={() => markRead(n.id)}
-              className={`flex w-full items-start gap-4 px-6 py-4 text-left transition-colors hover:bg-background-secondary ${!n.read ? "bg-primary-light/20" : ""}`}
+              className={`flex items-start gap-3 px-5 py-4 ${!n.isRead ? "bg-primary-light/30" : ""}`}
             >
-              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${typeStyles[n.type] ?? "bg-background-secondary text-text-secondary"}`}>
-                <Icon className="h-5 w-5" />
-              </span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-text">{n.title}</p>
-                  {!n.read && <Badge variant="primary">New</Badge>}
-                </div>
-                <p className="mt-1 text-sm text-text-secondary">{n.body}</p>
-                <p className="mt-1.5 text-xs text-text-secondary">{n.time}</p>
+              <Bell className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-text">{n.title}</p>
+                <p className="mt-0.5 text-sm text-text-secondary">{n.message}</p>
+                <p className="mt-1 text-xs text-text-secondary">
+                  {new Date(n.createdAt).toLocaleString()}
+                </p>
               </div>
-            </button>
-          );
-        })}
-      </div>
+              {!n.isRead && (
+                <button
+                  onClick={() => markOne.mutate(n.id)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Mark read
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

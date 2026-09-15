@@ -1,61 +1,86 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, Heart } from "lucide-react";
 import Link from "next/link";
-import { Star, Heart } from "lucide-react";
-import { courses } from "@/data/mock";
-import { Button } from "@/components/ui/button";
+import { CourseCard } from "@/components/course/CourseCard";
+import { wishlistApi } from "@/api/modules/wishlist";
+import { normalizeCourse } from "@/types/course";
+import { useAuthStore } from "@/store/auth.store";
+import { toast } from "sonner";
 
 export default function WishlistPage() {
-  const [wishlistIds, setWishlistIds] = useState<string[]>(["c2", "c4", "c6"]);
-  const wishlistCourses = courses.filter((c) => wishlistIds.includes(c.id));
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const qc = useQueryClient();
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["wishlist"],
+    queryFn: () => wishlistApi.list(),
+    enabled: isAuthenticated,
+    retry: 1,
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (courseId: string) => wishlistApi.remove(courseId),
+    onSuccess: () => {
+      toast.success("Removed from wishlist");
+      qc.invalidateQueries({ queryKey: ["wishlist"] });
+    },
+  });
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container-page py-16 text-center">
+        <Heart className="mx-auto h-12 w-12 text-text-secondary" />
+        <h1 className="mt-4 font-heading text-2xl font-bold text-text">Wishlist</h1>
+        <p className="mt-2 text-text-secondary">Log in to save courses.</p>
+        <Link href="/login" className="mt-6 inline-block text-primary hover:underline">
+          Log in
+        </Link>
+      </div>
+    );
+  }
+
+  const courses =
+    data?.map((item) =>
+      item.course
+        ? normalizeCourse(item.course)
+        : normalizeCourse({ id: item.courseId, title: "Course", description: "", price: 0, rating: 0, publisher: { id: "", name: "—" } }),
+    ) || [];
 
   return (
     <div className="container-page py-8">
       <h1 className="font-heading text-2xl font-bold text-text">Wishlist</h1>
-      <p className="mt-1 text-text-secondary">{wishlistCourses.length} courses saved for later.</p>
+      <p className="mt-1 text-text-secondary">
+        {isLoading ? "Loading…" : `${courses.length} saved courses.`}
+      </p>
 
-      {wishlistCourses.length === 0 ? (
+      {isLoading ? (
+        <div className="mt-16 flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : courses.length === 0 ? (
         <div className="mt-10 rounded-card border border-dashed border-border py-16 text-center">
-          <Heart className="mx-auto h-8 w-8 text-text-secondary" />
-          <p className="mt-3 font-heading font-semibold text-text">Your wishlist is empty</p>
-          <p className="mt-1 text-sm text-text-secondary">Save courses you're interested in to find them here later.</p>
-          <Link href="/courses" className="mt-5 inline-block">
-            <Button>Browse courses</Button>
+          <p className="font-heading font-semibold text-text">Wishlist is empty</p>
+          <p className="mt-1 text-sm text-text-secondary">
+            Save courses you want to take later.
+          </p>
+          <Link href="/courses" className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
+            Browse courses
           </Link>
         </div>
       ) : (
-        <div className="mt-6 space-y-4">
-          {wishlistCourses.map((course) => (
-            <div key={course.id} className="card-surface flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-              <Link href={`/courses/${course.id}`} className="relative h-40 w-full shrink-0 overflow-hidden rounded-card sm:h-24 sm:w-40">
-                <Image src={course.thumbnailUrl} alt={course.title} fill className="object-cover" />
-              </Link>
-              <div className="flex-1">
-                <Link href={`/courses/${course.id}`} className="font-heading font-semibold text-text hover:text-primary">
-                  {course.title}
-                </Link>
-                <p className="mt-1 text-sm text-text-secondary">{course.publisher.name}</p>
-                <div className="mt-1.5 flex items-center gap-1 text-sm">
-                  <Star className="h-4 w-4 fill-reward text-reward" />
-                  <span className="font-semibold text-text">{course.rating}</span>
-                  <span className="text-text-secondary">({course.reviewCount.toLocaleString()})</span>
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-3">
-                <span className="font-heading font-bold text-text">
-                  {course.price === 0 ? "Free" : `$${course.price}`}
-                </span>
-                <Button size="sm">Enroll</Button>
-                <button
-                  aria-label="Remove from wishlist"
-                  onClick={() => setWishlistIds((ids) => ids.filter((id) => id !== course.id))}
-                  className="rounded-full p-2 text-error hover:bg-red-50"
-                >
-                  <Heart className="h-4 w-4 fill-current" />
-                </button>
-              </div>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {courses.map((course) => (
+            <div key={course.id} className="relative">
+              <CourseCard course={course} />
+              <button
+                onClick={() => removeMutation.mutate(course.id)}
+                className="absolute right-3 top-3 rounded-full bg-white/90 p-2 shadow-sm hover:bg-white"
+                aria-label="Remove from wishlist"
+              >
+                <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+              </button>
             </div>
           ))}
         </div>

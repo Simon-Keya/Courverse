@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ChevronLeft, PlayCircle, FileText, HelpCircle, Flame, CheckCircle2, Circle,
-  Menu, X, ChevronRight,
+  Menu, X, ChevronRight, Loader2,
 } from "lucide-react";
-import { courses, curriculum } from "@/data/mock";
+import { courses as mockCourses, curriculum as mockCurriculum } from "@/data/mock";
 import { Button } from "@/components/ui/button";
+import { useCourse, useCourseProgress, useCompleteLesson } from "@/hooks/use-courses";
+import { toast } from "sonner";
 
 const quizQuestions = [
   {
@@ -25,33 +27,128 @@ const quizQuestions = [
   },
 ];
 
-export default function CoursePlayerPage({ params }: { params: { id: string } }) {
-  const course = courses.find((c) => c.id === params.id);
-  if (!course) notFound();
+type LessonItem = {
+  id: string;
+  title: string;
+  type: string;
+  duration?: string;
+  durationMinutes?: number;
+  content?: string;
+  videoUrl?: string;
+  completed?: boolean;
+};
 
-  const allLessons = curriculum.flatMap((m) => m.lessons);
-  const [completedIds, setCompletedIds] = useState<string[]>(
-    allLessons.filter((l) => l.completed).map((l) => l.id)
+type SectionItem = {
+  id: string;
+  title: string;
+  lessons: LessonItem[];
+};
+
+export default function CoursePlayerPage({
+  params,
+}: {
+  params: Promise<{ id: string }> | { id: string };
+}) {
+  const resolved =
+    typeof (params as any).then === "function"
+      ? use(params as Promise<{ id: string }>)
+      : (params as { id: string });
+  const courseId = resolved.id;
+
+  const { data: rawCourse, isLoading } = useCourse(courseId);
+  const { data: progressList } = useCourseProgress(courseId);
+  const completeLesson = useCompleteLesson();
+
+  const mock = mockCourses.find((c) => c.id === courseId);
+
+  const sections: SectionItem[] = useMemo(() => {
+    if (rawCourse?.sections?.length) {
+      return rawCourse.sections.map((s: any) => ({
+        id: s.id,
+        title: s.title,
+        lessons: (s.lessons || []).map((l: any) => ({
+          id: l.id,
+          title: l.title,
+          type: l.type || "video",
+          durationMinutes: l.durationMinutes,
+          content: l.content,
+          videoUrl: l.videoUrl,
+        })),
+      }));
+    }
+    return mockCurriculum.map((m: any) => ({
+      id: m.id,
+      title: m.title,
+      lessons: m.lessons.map((l: any) => ({
+        id: l.id,
+        title: l.title,
+        type: l.type,
+        duration: l.duration,
+        completed: l.completed,
+      })),
+    }));
+  }, [rawCourse, courseId]);
+
+  const allLessons = useMemo(
+    () => sections.flatMap((s) => s.lessons),
+    [sections],
   );
-  const [activeLessonId, setActiveLessonId] = useState(
-    allLessons.find((l) => !l.completed)?.id ?? allLessons[0].id
-  );
+
+  const completedFromApi = useMemo(() => {
+    const set = new Set<string>();
+    progressList?.forEach((p) => {
+      if (p.isCompleted) set.add(p.lessonId);
+    });
+    // Also seed from mock completed flags
+    allLessons.forEach((l) => {
+      if (l.completed) set.add(l.id);
+    });
+    return set;
+  }, [progressList, allLessons]);
+
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [activeLessonId, setActiveLessonId] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
-  const activeLesson = allLessons.find((l) => l.id === activeLessonId)!;
+  useEffect(() => {
+    setCompletedIds(completedFromApi);
+  }, [completedFromApi]);
+
+  useEffect(() => {
+    if (allLessons.length && !activeLessonId) {
+      const next =
+        allLessons.find((l) => !completedFromApi.has(l.id))?.id ?? allLessons[0]?.id;
+      if (next) setActiveLessonId(next);
+    }
+  }, [allLessons, completedFromApi, activeLessonId]);
+
+  if (!isLoading && !rawCourse && !mock) {
+    notFound();
+  }
+
+  if (isLoading && !mock && allLessons.length === 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const courseTitle = rawCourse?.title || mock?.title || "Course";
+  const activeLesson = allLessons.find((l) => l.id === activeLessonId) || allLessons[0];
   const activeIndex = allLessons.findIndex((l) => l.id === activeLessonId);
-  const progressPct = Math.round((completedIds.length / allLessons.length) * 100);
+  const progressPct =
+    allLessons.length > 0
+      ? Math.round((completedIds.size / allLessons.length) * 100)
+      : 0;
 
   const quizScore = useMemo(() => {
     const correct = quizQuestions.filter((q) => quizAnswers[q.id] === q.correctIndex).length;
     return Math.round((correct / quizQuestions.length) * 100);
   }, [quizAnswers]);
-
-  function markComplete(lessonId: string) {
-    setCompletedIds((prev) => (prev.includes(lessonId) ? prev : [...prev, lessonId]));
-  }
 
   function goToLesson(id: string) {
     setActiveLessonId(id);
@@ -60,117 +157,204 @@ export default function CoursePlayerPage({ params }: { params: { id: string } })
     setSidebarOpen(false);
   }
 
-  function goNext() {
-    markComplete(activeLesson.id);
-    const next = allLessons[activeIndex + 1];
-    if (next) goToLesson(next.id);
+  async function markCompleteAndContinue() {
+    if (!activeLesson) return;
+    setCompleting(true);
+    try {
+      // Try live API; ignore failure and still advance UI
+      if (rawCourse) {
+        await completeLesson.mutateAsync(activeLesson.id);
+        toast.success("+25 XP");
+      }
+      setCompletedIds((prev) => new Set(prev).add(activeLesson.id));
+      if (activeIndex < allLessons.length - 1) {
+        goToLesson(allLessons[activeIndex + 1].id);
+      } else {
+        toast.success("Course complete! 🎉");
+      }
+    } catch (err: any) {
+      // Still mark locally for UX when backend has no lesson yet
+      setCompletedIds((prev) => new Set(prev).add(activeLesson.id));
+      if (activeIndex < allLessons.length - 1) {
+        goToLesson(allLessons[activeIndex + 1].id);
+      }
+      if (err?.status !== 404) {
+        toast.error(err?.message || "Could not save progress");
+      }
+    } finally {
+      setCompleting(false);
+    }
   }
 
-  const icons = { video: PlayCircle, reading: FileText, quiz: HelpCircle, challenge: Flame };
+  function goNext() {
+    markCompleteAndContinue();
+  }
+
+  if (!activeLesson) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <p className="text-text-secondary">No lessons in this course yet.</p>
+        <Link href={`/courses/${courseId}`} className="inline-flex items-center justify-center gap-2 rounded-btn border border-border bg-white px-5 py-2.5 text-sm font-semibold text-text shadow-sm transition-all hover:bg-background-secondary">Back to course</Link>
+      </div>
+    );
+  }
+
+  const typeIcon = (type: string) => {
+    if (type === "reading") return <FileText className="h-4 w-4" />;
+    if (type === "quiz") return <HelpCircle className="h-4 w-4" />;
+    if (type === "challenge") return <Flame className="h-4 w-4" />;
+    return <PlayCircle className="h-4 w-4" />;
+  };
 
   return (
-    <div className="flex min-h-screen flex-col bg-white lg:flex-row">
-      {/* Top bar for player (overrides nothing, sits inside learner shell) */}
+    <div className="flex min-h-screen flex-col bg-background lg:flex-row">
+      {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-border px-4 py-3 lg:hidden">
-        <Link href={`/courses/${course.id}`} className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
-          <ChevronLeft className="h-4 w-4" /> Exit
+        <Link
+          href={`/courses/${courseId}`}
+          className="flex items-center gap-1 text-sm text-text-secondary"
+        >
+          <ChevronLeft className="h-4 w-4" /> Back
         </Link>
-        <button onClick={() => setSidebarOpen(true)} aria-label="Open curriculum" className="rounded-btn p-2 text-text-secondary hover:bg-background-secondary">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open curriculum"
+          className="rounded-btn p-2 text-text-secondary hover:bg-background-secondary"
+        >
           <Menu className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Curriculum sidebar */}
-      <aside className={`
-        fixed inset-0 z-50 bg-white lg:static lg:z-auto lg:w-80 lg:shrink-0 lg:border-r lg:border-border
-        ${sidebarOpen ? "block" : "hidden lg:block"}
-      `}>
+      {/* Sidebar curriculum */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-80 transform border-r border-border bg-white transition-transform lg:static lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
-            <div>
-              <Link href={`/courses/${course.id}`} className="hidden items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text lg:flex">
-                <ChevronLeft className="h-3.5 w-3.5" /> Exit course
+          <div className="flex items-center justify-between border-b border-border px-4 py-4">
+            <div className="min-w-0">
+              <Link
+                href={`/courses/${courseId}`}
+                className="text-xs text-text-secondary hover:text-text"
+              >
+                ← Course page
               </Link>
-              <p className="mt-1 line-clamp-1 font-heading text-sm font-semibold text-text">{course.title}</p>
+              <p className="mt-1 line-clamp-1 font-heading text-sm font-semibold text-text">
+                {courseTitle}
+              </p>
             </div>
-            <button onClick={() => setSidebarOpen(false)} aria-label="Close curriculum" className="rounded-btn p-1.5 text-text-secondary hover:bg-background-secondary lg:hidden">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close curriculum"
+              className="rounded-btn p-1.5 text-text-secondary hover:bg-background-secondary lg:hidden"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="border-b border-border px-5 py-4">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-background-secondary">
-              <div className="h-full rounded-full bg-progress-gradient" style={{ width: `${progressPct}%` }} />
+          <div className="border-b border-border px-4 py-3">
+            <div className="mb-1 flex justify-between text-xs">
+              <span className="font-medium text-primary">{progressPct}% complete</span>
+              <span className="text-text-secondary">
+                {completedIds.size}/{allLessons.length}
+              </span>
             </div>
-            <p className="mt-1.5 text-xs font-semibold text-primary">{progressPct}% complete</p>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-background-secondary">
+              <div
+                className="h-full rounded-full bg-progress-gradient transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-3 py-3">
-            {curriculum.map((module, mIndex) => (
-              <div key={module.id} className="mb-2">
-                <p className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-text-secondary">
-                  {mIndex + 1}. {module.title}
+          <nav className="flex-1 overflow-y-auto py-2">
+            {sections.map((section) => (
+              <div key={section.id} className="mb-2">
+                <p className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  {section.title}
                 </p>
-                <div className="space-y-0.5">
-                  {module.lessons.map((lesson) => {
-                    const Icon = icons[lesson.type as keyof typeof icons] ?? FileText;
-                    const isDone = completedIds.includes(lesson.id);
-                    const isActive = lesson.id === activeLessonId;
+                <ul>
+                  {section.lessons.map((lesson) => {
+                    const done = completedIds.has(lesson.id);
+                    const active = lesson.id === activeLessonId;
                     return (
-                      <button
-                        key={lesson.id}
-                        onClick={() => goToLesson(lesson.id)}
-                        className={`flex w-full items-center gap-3 rounded-btn px-3 py-2.5 text-left text-sm transition-colors ${
-                          isActive ? "bg-primary-light text-primary-hover" : "text-text hover:bg-background-secondary"
-                        }`}
-                      >
-                        {isDone ? (
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
-                        ) : (
-                          <Circle className="h-4 w-4 shrink-0 text-text-secondary" />
-                        )}
-                        <Icon className="h-4 w-4 shrink-0 text-text-secondary" />
-                        <span className="flex-1 line-clamp-1">{lesson.title}</span>
-                        <span className="shrink-0 text-xs text-text-secondary">{lesson.duration}</span>
-                      </button>
+                      <li key={lesson.id}>
+                        <button
+                          onClick={() => goToLesson(lesson.id)}
+                          className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
+                            active
+                              ? "bg-primary-light text-primary-hover"
+                              : "text-text-secondary hover:bg-background-secondary hover:text-text"
+                          }`}
+                        >
+                          {done ? (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                          ) : (
+                            <Circle className="h-4 w-4 shrink-0 opacity-40" />
+                          )}
+                          <span className="flex-1 line-clamp-1">{lesson.title}</span>
+                          <span className="opacity-60">{typeIcon(lesson.type)}</span>
+                        </button>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               </div>
             ))}
-          </div>
+          </nav>
         </div>
       </aside>
 
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
       {/* Main content */}
-      <main className="flex-1">
-        <div className="mx-auto max-w-3xl px-5 py-8 sm:px-8">
-          <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">
-            Lesson {activeIndex + 1} of {allLessons.length}
-          </p>
-          <h1 className="mt-1 font-heading text-2xl font-bold text-text">{activeLesson.title}</h1>
+      <main className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8">
+          <div className="flex items-center gap-2 text-xs text-text-secondary">
+            {typeIcon(activeLesson.type)}
+            <span className="capitalize">{activeLesson.type}</span>
+            {(activeLesson.duration || activeLesson.durationMinutes) && (
+              <>
+                <span aria-hidden>·</span>
+                <span>
+                  {activeLesson.duration ||
+                    `${activeLesson.durationMinutes} min`}
+                </span>
+              </>
+            )}
+          </div>
+          <h1 className="mt-2 font-heading text-2xl font-bold text-text sm:text-3xl">
+            {activeLesson.title}
+          </h1>
 
           {activeLesson.type === "quiz" ? (
             <div className="mt-8 space-y-6">
               {!quizSubmitted ? (
                 <>
-                  {quizQuestions.map((q, qIndex) => (
-                    <div key={q.id} className="card-surface p-6">
-                      <p className="font-medium text-text">{qIndex + 1}. {q.prompt}</p>
+                  {quizQuestions.map((q) => (
+                    <div key={q.id} className="card-surface p-5">
+                      <p className="font-medium text-text">{q.prompt}</p>
                       <div className="mt-4 space-y-2">
                         {q.options.map((opt, oIndex) => (
                           <label
-                            key={opt}
-                            className={`flex cursor-pointer items-center gap-3 rounded-btn border px-4 py-2.5 text-sm transition-colors ${
-                              quizAnswers[q.id] === oIndex ? "border-primary bg-primary-light" : "border-border hover:bg-background-secondary"
-                            }`}
+                            key={oIndex}
+                            className="flex cursor-pointer items-center gap-3 rounded-input border border-border px-4 py-3 text-sm hover:bg-background-secondary"
                           >
                             <input
                               type="radio"
                               name={q.id}
                               className="h-4 w-4 text-primary focus:ring-primary"
                               checked={quizAnswers[q.id] === oIndex}
-                              onChange={() => setQuizAnswers((prev) => ({ ...prev, [q.id]: oIndex }))}
+                              onChange={() =>
+                                setQuizAnswers((prev) => ({ ...prev, [q.id]: oIndex }))
+                              }
                             />
                             {opt}
                           </label>
@@ -189,56 +373,91 @@ export default function CoursePlayerPage({ params }: { params: { id: string } })
                 <div className="card-surface p-8 text-center">
                   <p className="font-heading text-3xl font-bold text-primary">{quizScore}%</p>
                   <p className="mt-1 text-text-secondary">
-                    {quizScore >= 70 ? "Nice work — you passed!" : "Not quite — review the lesson and try again."}
+                    {quizScore >= 70
+                      ? "Nice work — you passed!"
+                      : "Not quite — review the lesson and try again."}
                   </p>
                   <div className="mt-6 flex items-center justify-center gap-3">
-                    <Button variant="secondary" onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); }}>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setQuizSubmitted(false);
+                        setQuizAnswers({});
+                      }}
+                    >
                       Retake quiz
                     </Button>
-                    {quizScore >= 70 && <Button onClick={goNext}>Continue</Button>}
+                    {quizScore >= 70 && (
+                      <Button onClick={goNext} disabled={completing}>
+                        {completing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
             </div>
           ) : activeLesson.type === "challenge" ? (
             <div className="mt-8 card-surface bg-orange-50 p-8 text-center">
-              <Flame className="mx-auto h-8 w-8 text-challenge" />
+              <Flame className="mx-auto h-8 w-8 text-orange-600" />
               <p className="mt-3 font-heading text-lg font-semibold text-text">Final challenge</p>
               <p className="mt-2 text-sm text-text-secondary">
-                Apply everything from this module in one hands-on project. Submit your work to earn your certificate.
+                Apply everything from this module in one hands-on project.
               </p>
-              <Button className="mt-5" onClick={goNext}>Mark challenge complete</Button>
+              <Button className="mt-5" onClick={goNext} disabled={completing}>
+                {completing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Mark challenge complete
+              </Button>
             </div>
           ) : (
             <>
-              <div className="mt-6 relative aspect-video w-full overflow-hidden rounded-card bg-dark-bg">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <PlayCircle className="h-16 w-16 text-white/90" />
-                </div>
+              <div className="relative mt-6 aspect-video w-full overflow-hidden rounded-card bg-zinc-900">
+                {activeLesson.videoUrl ? (
+                  <video
+                    src={activeLesson.videoUrl}
+                    controls
+                    className="h-full w-full"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <PlayCircle className="h-16 w-16 text-white/90" />
+                  </div>
+                )}
               </div>
 
               <div className="prose-sm mt-6 space-y-4 text-text">
-                <p className="text-text-secondary">
-                  This is placeholder lesson content for <strong className="text-text">{activeLesson.title}</strong>. In
-                  production this area renders the publisher's markdown content alongside the video player above.
-                </p>
-                <p className="text-text-secondary">
-                  Use the sidebar to jump between lessons, or hit continue below once you're done to automatically
-                  mark this lesson complete and move to the next one.
-                </p>
+                {activeLesson.content ? (
+                  <div className="whitespace-pre-wrap text-text-secondary">
+                    {activeLesson.content}
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-text-secondary">
+                      Lesson content for{" "}
+                      <strong className="text-text">{activeLesson.title}</strong>.
+                      Mark complete when you&apos;re done to save progress and earn XP.
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
                 <button
-                  disabled={activeIndex === 0}
+                  disabled={activeIndex <= 0}
                   onClick={() => goToLesson(allLessons[activeIndex - 1].id)}
                   className="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text disabled:opacity-40"
                 >
                   <ChevronLeft className="h-4 w-4" /> Previous
                 </button>
-                <Button onClick={goNext}>
-                  {activeIndex === allLessons.length - 1 ? "Finish course" : "Mark complete & continue"}
-                  <ChevronRight className="h-4 w-4" />
+                <Button onClick={goNext} disabled={completing}>
+                  {completing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  {activeIndex === allLessons.length - 1
+                    ? "Finish course"
+                    : "Mark complete & continue"}
+                  <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
             </>

@@ -2,41 +2,65 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLogin } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const login = useLogin();
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    login.mutate(
+      { email, password },
+      {
+        onError: (err: any) => {
+          toast.error(err?.message || "Invalid email or password");
+        },
+        onSuccess: () => {
+          toast.success("Welcome back!");
+        },
+      },
+    );
+  };
 
   return (
     <div>
       <h1 className="font-heading text-2xl font-bold text-text">Welcome back</h1>
-      <p className="mt-2 text-sm text-text-secondary">Log in to continue where you left off.</p>
+      <p className="mt-2 text-sm text-text-secondary">
+        Log in to continue where you left off.
+      </p>
 
-      <form
-        className="mt-8 space-y-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setLoading(true);
-          setTimeout(() => setLoading(false), 1200);
-        }}
-      >
+      <form className="mt-8 space-y-5" onSubmit={onSubmit}>
         <div>
-          <label htmlFor="email" className="text-sm font-medium text-text">Email</label>
+          <label htmlFor="email" className="text-sm font-medium text-text">
+            Email
+          </label>
           <input
             id="email"
             type="email"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
+            autoComplete="email"
             className="mt-1.5 w-full rounded-input border border-border px-3.5 py-2.5 text-sm text-text placeholder:text-text-secondary focus:border-primary focus:outline-none"
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-medium text-text">Password</label>
-            <Link href="/forgot-password" className="text-xs font-medium text-primary hover:text-primary-hover">
+            <label htmlFor="password" className="text-sm font-medium text-text">
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-primary hover:text-primary-hover"
+            >
               Forgot password?
             </Link>
           </div>
@@ -45,7 +69,10 @@ export default function LoginPage() {
               id="password"
               type={showPassword ? "text" : "password"}
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              autoComplete="current-password"
               className="w-full rounded-input border border-border px-3.5 py-2.5 pr-10 text-sm text-text placeholder:text-text-secondary focus:border-primary focus:outline-none"
             />
             <button
@@ -60,28 +87,27 @@ export default function LoginPage() {
         </div>
 
         <label className="flex items-center gap-2 text-sm text-text-secondary">
-          <input type="checkbox" className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+          />
           Keep me logged in
         </label>
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Logging in…" : "Log in"}
+        <Button type="submit" className="w-full" disabled={login.isPending}>
+          {login.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in…
+            </>
+          ) : (
+            "Log in"
+          )}
         </Button>
       </form>
 
-      <div className="mt-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-border" />
-        <span className="text-xs text-text-secondary">or</span>
-        <div className="h-px flex-1 bg-border" />
-      </div>
-
-      <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-btn border border-border bg-white px-5 py-2.5 text-sm font-semibold text-text shadow-sm transition-colors hover:bg-background-secondary">
-        Continue with Google
-      </button>
-
       <p className="mt-8 text-center text-sm text-text-secondary">
-        Don't have an account?{" "}
-        <Link href="/register" className="font-semibold text-primary hover:text-primary-hover">
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="font-medium text-primary hover:underline">
           Sign up
         </Link>
       </p>

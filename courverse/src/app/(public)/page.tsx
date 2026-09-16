@@ -111,7 +111,7 @@ export default function LandingPage() {
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((cat) => {
-            const Icon = categoryIcons[cat.icon] || Code2;
+            const Icon = categoryIcons[cat.icon ?? "Code2"] || Code2;
             return (
               <Link
                 key={cat.id}
@@ -172,7 +172,7 @@ export default function LandingPage() {
               />
               <p className="mt-3 font-heading font-semibold text-text">{pub.name}</p>
               <p className="mt-1 text-xs text-text-secondary">
-                {pub.coursesCount} courses · {pub.studentsCount.toLocaleString()} students
+                {pub.coursesCount ?? 0} courses · {(pub.studentsCount ?? 0).toLocaleString()} students
               </p>
               <div className="mt-2 flex items-center justify-center gap-1 text-sm">
                 <Star className="h-4 w-4 fill-reward text-reward" />

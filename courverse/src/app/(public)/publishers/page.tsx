@@ -37,7 +37,7 @@ export default function PublishersPage() {
                   <BookOpen className="h-3.5 w-3.5" /> {pub.coursesCount} courses
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5" /> {pub.studentsCount.toLocaleString()} students
+                  <Users className="h-3.5 w-3.5" /> {(pub.studentsCount ?? 0).toLocaleString()} students
                 </span>
               </div>
             </Link>

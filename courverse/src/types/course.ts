@@ -7,6 +7,7 @@ export interface Publisher {
   studentsCount?: number;
   coursesCount?: number;
   rating?: number;
+  website?: string;
 }
 
 export interface Category {
@@ -15,7 +16,7 @@ export interface Category {
   slug: string;
   description?: string;
   courseCount?: number;
-  icon?: string;
+  icon: string;
 }
 
 export interface Course {

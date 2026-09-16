@@ -21,7 +21,7 @@ export default function CategoriesPage() {
       <section className="container-page py-16">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((cat) => {
-            const Icon = categoryIcons[cat.icon] ?? Code2;
+            const Icon = categoryIcons[cat.icon ?? "Code2"] ?? Code2;
             return (
               <Link key={cat.id} href={`/categories/${cat.slug}`} className="card-surface flex items-start gap-4 p-6">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">

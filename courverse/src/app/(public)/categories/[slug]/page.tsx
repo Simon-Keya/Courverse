@@ -16,7 +16,7 @@ export default async function CategoryDetailPage({ params }: { params: Promise<{
   const category = categories.find((c) => c.slug === slug);
   if (!category) notFound();
 
-  const Icon = categoryIcons[category.icon] ?? Code2;
+  const Icon = categoryIcons[category.icon ?? "Code2"] ?? Code2;
   const categoryCourses = courses.filter((c) => c.category === category.name);
 
   return (

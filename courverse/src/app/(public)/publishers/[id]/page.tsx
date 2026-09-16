@@ -20,7 +20,7 @@ export default async function PublisherDetailPage({ params }: { params: Promise<
       <section className="border-b border-border bg-background-secondary py-16">
         <div className="container-page flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
           <Image
-            src={publisher.avatarUrl}
+            src={publisher.avatarUrl || "https://i.pravatar.cc/150"}
             alt={publisher.name}
             width={96}
             height={96}
@@ -36,13 +36,13 @@ export default async function PublisherDetailPage({ params }: { params: Promise<
             <div className="mt-4 flex flex-wrap items-center justify-center gap-5 text-sm text-text-secondary sm:justify-start">
               <span className="flex items-center gap-1.5">
                 <Star className="h-4 w-4 fill-reward text-reward" />
-                <span className="font-semibold text-text">{publisher.rating}</span> rating
+                <span className="font-semibold text-text">{publisher.rating ?? 0}</span> rating
               </span>
               <span className="flex items-center gap-1.5">
-                <Users className="h-4 w-4" /> {publisher.studentsCount.toLocaleString()} students
+                <Users className="h-4 w-4" /> {(publisher.studentsCount ?? 0).toLocaleString()} students
               </span>
               <span className="flex items-center gap-1.5">
-                <BookOpen className="h-4 w-4" /> {publisher.coursesCount} courses
+                <BookOpen className="h-4 w-4" /> {publisher.coursesCount ?? 0} courses
               </span>
             </div>
           </div>

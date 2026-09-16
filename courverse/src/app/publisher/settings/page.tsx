@@ -24,7 +24,7 @@ export default function PublisherSettingsPage() {
       >
         <div className="card-surface flex items-center gap-5 p-6">
           <div className="relative">
-            <Image src={publisherProfile.avatarUrl} alt={publisherProfile.name} width={72} height={72} className="rounded-full" />
+            <Image src={publisherProfile.avatarUrl || "https://i.pravatar.cc/150"} alt={publisherProfile.name} width={72} height={72} className="rounded-full" />
             <button type="button" aria-label="Change avatar" className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-primary text-white">
               <Camera className="h-3.5 w-3.5" />
             </button>

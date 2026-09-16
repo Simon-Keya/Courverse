@@ -26,7 +26,7 @@ export default function AdminPublishersPage() {
               <tr key={p.id} className="border-b border-border last:border-b-0">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <Image src={p.avatarUrl} alt={p.name} width={32} height={32} className="rounded-full" />
+                    <Image src={p.avatarUrl || `https://i.pravatar.cc/128?u=${p.id}`} alt={p.name} width={32} height={32} className="rounded-full" />
                     <span className="font-medium text-text">{p.name}</span>
                   </div>
                 </td>

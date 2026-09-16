@@ -26,7 +26,7 @@ export default function ProfileSettingsPage() {
         {/* Avatar */}
         <div className="card-surface flex items-center gap-5 p-6">
           <div className="relative">
-            <Image src={currentUser.avatarUrl} alt={currentUser.name} width={72} height={72} className="rounded-full" />
+            <Image src={currentUser.avatarUrl || "https://i.pravatar.cc/150"} alt={currentUser.name} width={72} height={72} className="rounded-full" />
             <button type="button" aria-label="Change avatar" className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-primary text-white">
               <Camera className="h-3.5 w-3.5" />
             </button>

@@ -64,7 +64,7 @@ export default function SearchPage() {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {results.publishers.map((p) => (
               <Link key={p.id} href={`/publishers/${p.id}`} className="card-surface flex items-center gap-3 p-4">
-                <Image src={p.avatarUrl} alt={p.name} width={40} height={40} className="rounded-full" />
+                <Image src={p.avatarUrl || `https://i.pravatar.cc/128?u=${p.id}`} alt={p.name} width={40} height={40} className="rounded-full" />
                 <span className="font-medium text-text">{p.name}</span>
               </Link>
             ))}

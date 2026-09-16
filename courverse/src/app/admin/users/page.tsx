@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
               <tr key={u.id} className="border-b border-border last:border-b-0">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <Image src={u.avatarUrl} alt={u.name} width={32} height={32} className="rounded-full" />
+                    <Image src={u.avatarUrl || `https://i.pravatar.cc/128?u=${u.id}`} alt={u.name} width={32} height={32} className="rounded-full" />
                     <div>
                       <p className="font-medium text-text">{u.name}</p>
                       <p className="text-xs text-text-secondary">{u.email}</p>

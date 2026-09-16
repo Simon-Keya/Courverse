@@ -62,7 +62,7 @@ export function LearnerTopbar({ onMenuClick }: { onMenuClick: () => void }) {
 
         <div className="relative">
           <button onClick={() => setUserOpen((v) => !v)} className="flex items-center gap-2 rounded-full p-1 pr-2 hover:bg-background-secondary">
-            <Image src={currentUser.avatarUrl} alt={currentUser.name} width={32} height={32} className="rounded-full" />
+            <Image src={currentUser.avatarUrl || "https://i.pravatar.cc/150"} alt={currentUser.name} width={32} height={32} className="rounded-full" />
             <ChevronDown className="hidden h-4 w-4 text-text-secondary sm:block" />
           </button>
 

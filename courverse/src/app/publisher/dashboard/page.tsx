@@ -97,7 +97,7 @@ export default function PublisherDashboardPage() {
           <div className="mt-4 card-surface divide-y divide-border">
             {recentStudents.map((s) => (
               <div key={s.id} className="flex items-center gap-3 px-5 py-3.5">
-                <Image src={s.avatarUrl} alt={s.name} width={36} height={36} className="h-9 w-9 rounded-full" />
+                <Image src={s.avatarUrl || `https://i.pravatar.cc/128?u=${s.id || s.name}`} alt={s.name} width={36} height={36} className="h-9 w-9 rounded-full" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-text">{s.name}</p>
                   <p className="text-xs text-text-secondary line-clamp-1">{s.course}</p>

@@ -22,7 +22,7 @@ export default function PublisherStudentsPage() {
               <tr key={s.id} className="border-b border-border last:border-b-0">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <Image src={s.avatarUrl} alt={s.name} width={32} height={32} className="rounded-full" />
+                    <Image src={s.avatarUrl || `https://i.pravatar.cc/128?u=${s.id || s.name}`} alt={s.name} width={32} height={32} className="rounded-full" />
                     <span className="font-medium text-text">{s.name}</span>
                   </div>
                 </td>

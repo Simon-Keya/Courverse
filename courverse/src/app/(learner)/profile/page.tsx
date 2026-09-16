@@ -13,7 +13,7 @@ export default function ProfilePage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1.4fr]">
         <div className="card-surface p-6 text-center">
           <div className="relative mx-auto w-fit">
-            <Image src={currentUser.avatarUrl} alt={currentUser.name} width={96} height={96} className="rounded-full" />
+            <Image src={currentUser.avatarUrl || "https://i.pravatar.cc/150"} alt={currentUser.name} width={96} height={96} className="rounded-full" />
             <button aria-label="Change avatar" className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-white">
               <Camera className="h-4 w-4" />
             </button>

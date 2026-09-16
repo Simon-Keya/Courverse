@@ -164,7 +164,7 @@ export default function LandingPage() {
               className="card-surface p-6 text-center transition-shadow hover:shadow-md"
             >
               <Image
-                src={pub.avatarUrl}
+                src={pub.avatarUrl || `https://i.pravatar.cc/128?u=${pub.id}`}
                 alt={pub.name}
                 width={64}
                 height={64}
@@ -176,7 +176,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-2 flex items-center justify-center gap-1 text-sm">
                 <Star className="h-4 w-4 fill-reward text-reward" />
-                <span className="font-semibold text-text">{pub.rating}</span>
+                <span className="font-semibold text-text">{pub.rating ?? 0}</span>
               </div>
             </Link>
           ))}
@@ -197,7 +197,7 @@ export default function LandingPage() {
                 </p>
                 <div className="mt-5 flex items-center gap-3">
                   <Image
-                    src={t.avatarUrl}
+                    src={t.avatarUrl || `https://i.pravatar.cc/128?u=${t.id}`}
                     alt={t.name}
                     width={40}
                     height={40}

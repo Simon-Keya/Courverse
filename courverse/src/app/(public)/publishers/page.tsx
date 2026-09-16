@@ -20,7 +20,7 @@ export default function PublishersPage() {
           {publishers.map((pub) => (
             <Link key={pub.id} href={`/publishers/${pub.id}`} className="card-surface p-6">
               <div className="flex items-center gap-4">
-                <Image src={pub.avatarUrl} alt={pub.name} width={56} height={56} className="rounded-full" />
+                <Image src={pub.avatarUrl || `https://i.pravatar.cc/128?u=${pub.id}`} alt={pub.name} width={56} height={56} className="rounded-full" />
                 <div>
                   <p className="font-heading font-semibold text-text">{pub.name}</p>
                   <div className="mt-0.5 flex items-center gap-1 text-sm">

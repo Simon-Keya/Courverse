@@ -1,11 +1,45 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
+/* ============================================================
+   Courverse Design Tokens — Tailwind CSS v4
+   ============================================================ */
+
+@theme {
+  /* Colors → utilities: bg-background, text-text, border-border, etc. */
+  --color-background: #f8fafc;
+  --color-background-secondary: #f1f5f9;
+  --color-card: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+  --color-primary: #16a34a;
+  --color-primary-hover: #15803d;
+  --color-primary-light: #dcfce7;
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-accent: #16a34a;
+  --color-muted: #f1f5f9;
+  --color-foreground: #0f172a;
+  --color-primary-foreground: #ffffff;
+  --color-accent-foreground: #0f172a;
+  --color-destructive: #dc2626;
+  --color-input: #e2e8f0;
+  --color-ring: #16a34a;
+  --color-muted-foreground: #64748b;
+
+  /* Fonts → utilities: font-heading, font-body, font-mono, font-sans
+     next/font injects --font-body / --font-heading / --font-mono on <html> */
+  --font-heading: var(--font-heading), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), "Geist Mono", ui-monospace, monospace;
+  --font-sans: var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius → utilities: rounded-btn, rounded-card, rounded-input */
+  --radius-btn: 0.5rem;
+  --radius-card: 0.75rem;
+  --radius-input: 0.5rem;
 }
 
 @layer base {
@@ -26,7 +60,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #16A34A;
+    outline: 2px solid #16a34a;
     outline-offset: 2px;
   }
 }

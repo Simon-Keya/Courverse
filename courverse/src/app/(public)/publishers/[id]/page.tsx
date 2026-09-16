@@ -8,8 +8,9 @@ export function generateStaticParams() {
   return publishers.map((p) => ({ id: p.id }));
 }
 
-export default function PublisherDetailPage({ params }: { params: { id: string } }) {
-  const publisher = publishers.find((p) => p.id === params.id);
+export default async function PublisherDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const publisher = publishers.find((p) => p.id === id);
   if (!publisher) notFound();
 
   const publisherCourses = courses.filter((c) => c.publisher.id === publisher.id);

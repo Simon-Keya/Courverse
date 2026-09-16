@@ -47,13 +47,9 @@ type SectionItem = {
 export default function CoursePlayerPage({
   params,
 }: {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const resolved =
-    typeof (params as any).then === "function"
-      ? use(params as Promise<{ id: string }>)
-      : (params as { id: string });
-  const courseId = resolved.id;
+  const { id: courseId } = use(params);
 
   const { data: rawCourse, isLoading } = useCourse(courseId);
   const { data: progressList } = useCourseProgress(courseId);

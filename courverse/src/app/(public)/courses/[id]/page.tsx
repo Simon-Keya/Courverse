@@ -22,10 +22,9 @@ import { useRouter } from "next/navigation";
 export default function CourseDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const resolved = typeof (params as any).then === "function" ? use(params as Promise<{ id: string }>) : (params as { id: string });
-  const id = resolved.id;
+  const { id } = use(params);
 
   const { data: raw, isLoading, isError } = useCourse(id);
   const { data: enrollment } = useEnrollment(id);

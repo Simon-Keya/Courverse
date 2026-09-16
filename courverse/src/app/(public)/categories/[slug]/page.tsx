@@ -11,8 +11,9 @@ export function generateStaticParams() {
   return categories.map((c) => ({ slug: c.slug }));
 }
 
-export default function CategoryDetailPage({ params }: { params: { slug: string } }) {
-  const category = categories.find((c) => c.slug === params.slug);
+export default async function CategoryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const category = categories.find((c) => c.slug === slug);
   if (!category) notFound();
 
   const Icon = categoryIcons[category.icon] ?? Code2;

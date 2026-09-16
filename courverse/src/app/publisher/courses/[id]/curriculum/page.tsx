@@ -12,13 +12,9 @@ import { toast } from "sonner";
 export default function CurriculumEditorPage({
   params,
 }: {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const resolved =
-    typeof (params as any).then === "function"
-      ? use(params as Promise<{ id: string }>)
-      : (params as { id: string });
-  const courseId = resolved.id;
+  const { id: courseId } = use(params);
   const qc = useQueryClient();
   const [sectionTitle, setSectionTitle] = useState("");
   const [lessonForms, setLessonForms] = useState<Record<string, { title: string; type: string }>>({});

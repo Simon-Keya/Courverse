@@ -4,6 +4,19 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AuthUser } from "@/api/modules/auth";
 
+const TOKEN_KEY = "access_token";
+const COOKIE_NAME = "accessToken";
+
+function setTokenCookie(token: string | null) {
+  if (typeof document === "undefined") return;
+  if (token) {
+    // 7 days; middleware reads this for route protection (UX only — backend still authorizes)
+    document.cookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+  } else {
+    document.cookie = `${COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  }
+}
+
 interface AuthState {
   user: AuthUser | null;
   token: string | null;
@@ -23,7 +36,8 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (user, token) => {
         if (typeof window !== "undefined") {
-          localStorage.setItem("access_token", token);
+          localStorage.setItem(TOKEN_KEY, token);
+          setTokenCookie(token);
         }
         set({ user, token, isAuthenticated: true });
       },
@@ -32,16 +46,20 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
+          localStorage.removeItem(TOKEN_KEY);
+          setTokenCookie(null);
         }
         set({ user: null, token: null, isAuthenticated: false });
       },
 
       hydrate: () => {
         if (typeof window === "undefined") return;
-        const token = localStorage.getItem("access_token");
-        if (token && !get().token) {
-          set({ token, isAuthenticated: true });
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (token) {
+          setTokenCookie(token);
+          if (!get().token) {
+            set({ token, isAuthenticated: true });
+          }
         }
       },
     }),

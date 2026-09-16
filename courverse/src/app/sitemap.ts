@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { env } from "@/config/env";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://courverse.com";
+  const base = env.siteUrl || "https://courverse.onrender.com";
 
   return [
     { url: base, lastModified: new Date(), changeFrequency: "daily", priority: 1 },

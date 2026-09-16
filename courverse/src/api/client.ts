@@ -1,16 +1,23 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import { env } from "@/config/env";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+export interface ApiError {
+  message: string;
+  status?: number;
+  original?: unknown;
+}
+
+const baseURL = env.apiUrl || undefined;
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
   timeout: 15000,
 });
 
-// Request interceptor — attach token
+// Attach Bearer token from localStorage (client only)
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
@@ -19,32 +26,42 @@ apiClient.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
+    // Fail fast if no base URL configured in production
+    if (!config.baseURL && typeof window !== "undefined") {
+      return Promise.reject({
+        message:
+          "API URL is not configured. Set NEXT_PUBLIC_API_URL for this deployment.",
+        status: 0,
+      } satisfies ApiError);
+    }
     return config;
   },
   (error) => Promise.reject(error),
 );
 
-// Response interceptor — basic error normalization
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ message?: string | string[]; statusCode?: number }>) => {
-    const message =
+    const raw =
       error.response?.data?.message ||
       error.message ||
       "Something went wrong";
+    const message = Array.isArray(raw) ? raw.join(", ") : raw;
     const status = error.response?.status;
 
-    // Auto-logout on 401
     if (status === 401 && typeof window !== "undefined") {
       localStorage.removeItem("access_token");
-      // Optional: redirect handled by consumers
+      // Clear auth cookie used by middleware
+      document.cookie =
+        "accessToken=; path=/; max-age=0; SameSite=Lax";
     }
 
-    return Promise.reject({
-      message: Array.isArray(message) ? message.join(", ") : message,
+    const normalized: ApiError = {
+      message,
       status,
       original: error,
-    });
+    };
+    return Promise.reject(normalized);
   },
 );
 

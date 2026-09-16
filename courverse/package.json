@@ -62,7 +62,9 @@
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "@eslint/eslintrc": "^3"
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

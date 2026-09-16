@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: courverse-frontend
+    runtime: node
+    plan: free
+    rootDir: courverse
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: "20.18.0"
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false

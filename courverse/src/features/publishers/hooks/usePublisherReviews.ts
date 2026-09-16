@@ -8,13 +8,11 @@ import type { GetPublisherReviewsDto } from "../types";
 export function usePublisherReviews(
   params: GetPublisherReviewsDto | undefined,
 ) {
+  const publisherId = params?.publisherId ?? "";
   return useQuery({
-    queryKey: publisherCacheKeys.reviews(
-      params?.publisherId ?? "",
-      params,
-    ),
+    queryKey: publisherCacheKeys.reviews(publisherId, params),
     queryFn: () => getPublisherReviews(params!),
-    enabled: !!params?.publisherId,
+    enabled: Boolean(params?.publisherId),
     staleTime: 60_000,
   });
 }

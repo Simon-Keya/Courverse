@@ -8,13 +8,11 @@ import type { GetPublisherCoursesDto } from "../types";
 export function usePublisherCourses(
   params: GetPublisherCoursesDto | undefined,
 ) {
+  const publisherId = params?.publisherId ?? "";
   return useQuery({
-    queryKey: publisherCacheKeys.courses(
-      params?.publisherId ?? "",
-      params,
-    ),
+    queryKey: publisherCacheKeys.courses(publisherId, params),
     queryFn: () => getPublisherCourses(params!),
-    enabled: !!params?.publisherId,
+    enabled: Boolean(params?.publisherId),
     staleTime: 60_000,
   });
 }

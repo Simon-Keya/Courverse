@@ -2,8 +2,13 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/**
+ * Full shadcn-compatible Button API.
+ * Includes every variant/size used by generated UI primitives
+ * (carousel, dialog, sheet, calendar, pagination, etc.).
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-btn font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-btn font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -18,12 +23,14 @@ const buttonVariants = cva(
         link: "bg-transparent text-primary underline-offset-4 hover:underline shadow-none",
       },
       size: {
-        xs: "px-2.5 py-1 text-xs",
-        sm: "px-3.5 py-1.5 text-xs",
-        md: "px-5 py-2.5 text-sm",
-        default: "px-5 py-2.5 text-sm",
-        lg: "px-6 py-3 text-base",
+        xs: "h-7 px-2.5 text-xs",
+        sm: "h-8 px-3.5 text-xs",
+        md: "h-10 px-5 text-sm",
+        default: "h-10 px-5 text-sm",
+        lg: "h-11 px-6 text-base",
         icon: "h-9 w-9 p-0",
+        "icon-sm": "h-8 w-8 p-0",
+        "icon-lg": "h-10 w-10 p-0",
       },
     },
     defaultVariants: {

@@ -3,10 +3,17 @@ import { Category, Course, Publisher, Testimonial } from "@/types/course";
 export const categories: Category[] = [
   { id: "1", name: "Web Development", slug: "web-development", description: "Build modern websites and web apps.", courseCount: 128, icon: "Code2" },
   { id: "2", name: "Data Science", slug: "data-science", description: "Analyze data and build ML models.", courseCount: 94, icon: "BarChart3" },
-  { id: "3", name: "Design", slug: "design", description: "UI, UX, and product design.", courseCount: 76, icon: "Palette" },
-  { id: "4", name: "Business", slug: "business", description: "Strategy, marketing, and finance.", courseCount: 112, icon: "Briefcase" },
-  { id: "5", name: "Mobile Development", slug: "mobile-development", description: "iOS, Android, and cross-platform.", courseCount: 58, icon: "Smartphone" },
-  { id: "6", name: "AI & Machine Learning", slug: "ai-machine-learning", description: "Deep learning and applied AI.", courseCount: 71, icon: "Sparkles" },
+  { id: "3", name: "Design", slug: "design", description: "UI, UX, graphic, and product design.", courseCount: 76, icon: "Palette" },
+  { id: "4", name: "Business", slug: "business", description: "Strategy, management, and entrepreneurship.", courseCount: 112, icon: "Briefcase" },
+  { id: "5", name: "Mobile Development", slug: "mobile-development", description: "iOS, Android, and cross-platform apps.", courseCount: 58, icon: "Smartphone" },
+  { id: "6", name: "AI & Machine Learning", slug: "ai-machine-learning", description: "AI systems, ML models, and applied intelligence.", courseCount: 41, icon: "Sparkles" },
+  { id: "7", name: "Finance", slug: "finance", description: "Accounting, investing, and financial literacy.", courseCount: 67, icon: "Wallet" },
+  { id: "8", name: "Marketing", slug: "marketing", description: "Digital marketing, branding, and growth.", courseCount: 83, icon: "Megaphone" },
+  { id: "9", name: "Languages", slug: "languages", description: "Speak, write, and communicate across cultures.", courseCount: 95, icon: "Languages" },
+  { id: "10", name: "Academic", slug: "academic", description: "Math, science, history, and research skills.", courseCount: 120, icon: "BookOpen" },
+  { id: "11", name: "Professional Development", slug: "professional-development", description: "Communication, leadership, and career skills.", courseCount: 88, icon: "UserCheck" },
+  { id: "12", name: "Vocational Skills", slug: "vocational-skills", description: "Practical trades and hands-on skills.", courseCount: 54, icon: "Wrench" },
+  { id: "13", name: "Personal Development", slug: "personal-development", description: "Productivity, confidence, and life skills.", courseCount: 72, icon: "Heart" },
 ];
 
 export const publishers: Publisher[] = [

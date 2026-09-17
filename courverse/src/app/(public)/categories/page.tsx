@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, ArrowRight } from "lucide-react";
+import { Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, Wallet, Megaphone, Languages, BookOpen, UserCheck, Wrench, Heart, ArrowRight } from "lucide-react";
 import { categories } from "@/data/mock";
 
 const categoryIcons: Record<string, typeof Code2> = {
-  Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles,
+  Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, Wallet, Megaphone, Languages, BookOpen, UserCheck, Wrench, Heart,
 };
 
 export default function CategoriesPage() {

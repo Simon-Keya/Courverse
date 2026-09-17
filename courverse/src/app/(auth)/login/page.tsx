@@ -2,40 +2,46 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
+const loginSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  remember: z.boolean().optional(),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
-  const [fieldError, setFieldError] = useState<string | null>(null);
   const login = useLogin();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "", remember: false },
+  });
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFieldError(null);
-    if (password.length < 6) {
-      setFieldError("Password must be at least 6 characters.");
-      return;
-    }
+  const onSubmit = (values: LoginForm) => {
     login.mutate(
-      { email, password, remember },
+      { email: values.email, password: values.password, remember: values.remember },
       {
         onError: (err: unknown) => {
           const message =
             err && typeof err === "object" && "message" in err
               ? String((err as { message: string }).message)
               : "Invalid email or password";
-          setFieldError(message);
           toast.error(message);
         },
-        onSuccess: () => {
-          toast.success("Welcome back!");
-        },
+        onSuccess: () => toast.success("Welcome back!"),
       },
     );
   };
@@ -47,7 +53,7 @@ export default function LoginPage() {
         Log in to continue where you left off.
       </p>
 
-      <form className="mt-8 space-y-5" onSubmit={onSubmit}>
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div>
           <label htmlFor="email" className="text-sm font-medium text-text">
             Email
@@ -55,13 +61,18 @@ export default function LoginPage() {
           <input
             id="email"
             type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
             autoComplete="email"
+            aria-invalid={errors.email ? "true" : "false"}
+            aria-describedby={errors.email ? "email-error" : undefined}
             className="mt-1.5 w-full rounded-input border border-border px-3.5 py-2.5 text-sm text-text placeholder:text-text-secondary focus:border-primary focus:outline-none"
+            placeholder="you@example.com"
+            {...register("email")}
           />
+          {errors.email && (
+            <p id="email-error" role="alert" className="mt-1.5 text-xs text-error">
+              {errors.email.message}
+            </p>
+          )}
         </div>
 
         <div>
@@ -79,54 +90,47 @@ export default function LoginPage() {
           <div className="relative mt-1.5">
             <input
               id="password"
-              aria-invalid={fieldError ? "true" : "false"}
-              aria-describedby={fieldError ? "login-error" : undefined}
               type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
               autoComplete="current-password"
-              className="w-full rounded-input border border-border px-3.5 py-2.5 pr-10 text-sm text-text placeholder:text-text-secondary focus:border-primary focus:outline-none"
+              aria-invalid={errors.password ? "true" : "false"}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              className="w-full rounded-input border border-border px-3.5 py-2.5 pr-10 text-sm text-text focus:border-primary focus:outline-none"
+              placeholder="••••••••"
+              {...register("password")}
             />
             <button
               type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary"
+              onClick={() => setShowPassword((s) => !s)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+          {errors.password && (
+            <p id="password-error" role="alert" className="mt-1.5 text-xs text-error">
+              {errors.password.message}
+            </p>
+          )}
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
-          <input
-            type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-          />
+        <label className="flex items-center gap-2 text-sm text-text">
+          <input type="checkbox" className="rounded border-border" {...register("remember")} />
           Keep me logged in
         </label>
 
-        {fieldError && (
-          <p id="login-error" role="alert" className="text-sm text-error">
-            {fieldError}
-          </p>
-        )}
         <Button type="submit" className="w-full" disabled={login.isPending}>
           {login.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in…
+              <Loader2 className="h-4 w-4 animate-spin" /> Signing in…
             </>
           ) : (
-            "Log in"
+            "Sign in"
           )}
         </Button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-text-secondary">
+      <p className="mt-6 text-center text-sm text-text-secondary">
         Don&apos;t have an account?{" "}
         <Link href="/register" className="font-medium text-primary hover:underline">
           Sign up

@@ -61,7 +61,7 @@ export default function NewCoursePage() {
       });
       toast.success("Course created as draft");
       router.push(`/publisher/courses`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message || "Failed to create course");
     } finally {
       setLoading(false);

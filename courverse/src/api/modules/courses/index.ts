@@ -1,3 +1,5 @@
+import type { Course as UiCourse } from "@/types/course";
+import { normalizeCourse } from "@/types/course";
 import apiClient from "../../client";
 
 export interface CourseListParams {

@@ -43,7 +43,7 @@ export default function CourseDetailPage({
       qc.invalidateQueries({ queryKey: ["wishlist"] });
       toast.success(wishStatus?.inWishlist ? "Removed from wishlist" : "Saved to wishlist");
     },
-    onError: (e: any) => toast.error(e?.message || "Wishlist update failed"),
+    onError: (e: { message?: string }) => toast.error(e?.message || "Wishlist update failed"),
   });
   const router = useRouter();
 
@@ -72,7 +72,7 @@ export default function CourseDetailPage({
   const totalLessons =
     course.lessonCount ||
     course.lessonsCount ||
-    sections.reduce((acc: number, s: any) => acc + (s.lessons?.length || 0), 0);
+    sections.reduce((acc: number, s: { lessons?: unknown[] }) => acc + (s.lessons?.length || 0), 0);
 
   const handleEnroll = () => {
     if (!isAuthenticated) {
@@ -85,7 +85,7 @@ export default function CourseDetailPage({
         toast.success("Enrolled successfully!");
         router.push(`/courses/${id}/learn`);
       },
-      onError: (err: any) => {
+      onError: (err: unknown) => {
         toast.error(err?.message || "Could not enroll");
       },
     });
@@ -251,7 +251,7 @@ export default function CourseDetailPage({
               {sections.length} sections · {totalLessons} lessons
             </p>
             <div className="mt-6 space-y-3">
-              {sections.map((section: any, idx: number) => (
+              {sections.map((section: { id?: string; title?: string; lessons?: { id?: string; title?: string; durationMinutes?: number; isPreview?: boolean }[] }, idx: number) => (
                 <details
                   key={section.id || idx}
                   className="group rounded-card border border-border bg-white open:shadow-sm"
@@ -266,7 +266,7 @@ export default function CourseDetailPage({
                     </span>
                   </summary>
                   <ul className="border-t border-border px-5 py-2">
-                    {(section.lessons || []).map((lesson: any) => (
+                    {(section.lessons || []).map((lesson: { id: string; title: string }) => (
                       <li
                         key={lesson.id}
                         className="flex items-center gap-3 py-2.5 text-sm text-text-secondary"

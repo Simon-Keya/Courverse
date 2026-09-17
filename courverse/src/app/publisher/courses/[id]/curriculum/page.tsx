@@ -32,7 +32,7 @@ export default function CurriculumEditorPage({
       setSectionTitle("");
       qc.invalidateQueries({ queryKey: ["course", courseId] });
     },
-    onError: (e: any) => toast.error(e?.message || "Failed"),
+    onError: (e: { message?: string }) => toast.error(e?.message || "Failed"),
   });
 
   const addLesson = useMutation({
@@ -45,7 +45,7 @@ export default function CurriculumEditorPage({
       setLessonForms((f) => ({ ...f, [vars.sectionId]: { title: "", type: "video" } }));
       qc.invalidateQueries({ queryKey: ["course", courseId] });
     },
-    onError: (e: any) => toast.error(e?.message || "Failed"),
+    onError: (e: { message?: string }) => toast.error(e?.message || "Failed"),
   });
 
   const deleteSection = useMutation({
@@ -86,7 +86,7 @@ export default function CurriculumEditorPage({
       <p className="mt-1 text-sm text-text-secondary">{course?.title}</p>
 
       <div className="mt-8 space-y-6">
-        {sections.map((section: any) => (
+        {sections.map((section: { id: string; title: string; lessons?: unknown[] }) => (
           <div key={section.id} className="rounded-card border border-border bg-white p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-heading font-semibold text-text">{section.title}</h2>
@@ -99,7 +99,7 @@ export default function CurriculumEditorPage({
               </button>
             </div>
             <ul className="mt-3 space-y-2">
-              {(section.lessons || []).map((lesson: any) => (
+              {(section.lessons || []).map((lesson: { id: string; title: string }) => (
                 <li
                   key={lesson.id}
                   className="flex items-center justify-between rounded-input border border-border px-3 py-2 text-sm"

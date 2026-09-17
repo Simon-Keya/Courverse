@@ -9,6 +9,8 @@ export interface SignupPayload {
   username: string;
   email: string;
   password: string;
+  /** Sent to backend when supported; ignored safely if backend drops unknown fields */
+  role?: "learner" | "publisher";
 }
 
 export interface AuthUser {
@@ -27,6 +29,7 @@ export interface AuthUser {
 export interface AuthResponse {
   access_token: string;
   user: AuthUser;
+  refresh_token?: string;
 }
 
 export const authApi = {
@@ -40,6 +43,20 @@ export const authApi = {
     return data;
   },
 
+  /**
+   * Refresh access token.
+   * Contract (confirm with backend — see MIGRATION-NOTES.md):
+   * POST /auth/refresh  body: { refresh_token?: string } OR cookie-only
+   * response: { access_token, refresh_token?, user? }
+   */
+  refresh: async (refreshToken?: string): Promise<AuthResponse> => {
+    const { data } = await apiClient.post<AuthResponse>(
+      "/auth/refresh",
+      refreshToken ? { refresh_token: refreshToken } : {},
+    );
+    return data;
+  },
+
   profile: async (): Promise<AuthUser> => {
     const { data } = await apiClient.get<AuthUser>("/auth/profile");
     return data;
@@ -48,5 +65,13 @@ export const authApi = {
   me: async (): Promise<AuthUser> => {
     const { data } = await apiClient.get<AuthUser>("/auth/me");
     return data;
+  },
+
+  logout: async (): Promise<void> => {
+    try {
+      await apiClient.post("/auth/logout");
+    } catch {
+      /* best-effort */
+    }
   },
 };

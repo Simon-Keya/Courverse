@@ -9,7 +9,8 @@
     "lint": "eslint",
     "prepare": "husky || true",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"No unit tests yet \u2014 add Vitest in a follow-up\" && exit 0"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -56,7 +57,8 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "@eslint/eslintrc": "^3.3.1"
+    "@eslint/eslintrc": "^3.3.1",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=20.0.0"

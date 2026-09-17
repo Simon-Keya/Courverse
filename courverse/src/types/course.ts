@@ -1,3 +1,87 @@
+import { z } from "zod";
+
+export const publisherRefSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string().optional(),
+    avatarUrl: z.string().optional().nullable(),
+  })
+  .passthrough();
+
+export const categorySchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string().optional(),
+    description: z.string().optional().nullable(),
+    courseCount: z.number().optional(),
+    icon: z.string().optional(),
+  })
+  .passthrough();
+
+export const lessonSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    type: z.string().optional(),
+    videoUrl: z.string().optional().nullable(),
+    content: z.string().optional().nullable(),
+    durationMinutes: z.number().optional(),
+    orderIndex: z.number().optional(),
+    isPreview: z.boolean().optional(),
+  })
+  .passthrough();
+
+export const sectionSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    orderIndex: z.number().optional(),
+    lessons: z.array(lessonSchema).optional(),
+  })
+  .passthrough();
+
+/** Loose API course — extra fields allowed */
+export const courseApiSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    slug: z.string().optional(),
+    description: z.string().optional().nullable(),
+    shortDescription: z.string().optional().nullable(),
+    thumbnailUrl: z.string().optional().nullable(),
+    publisher: publisherRefSchema.optional().nullable(),
+    publisherId: z.string().optional(),
+    category: z.union([z.string(), categorySchema]).optional().nullable(),
+    categoryId: z.string().optional(),
+    difficulty: z.string().optional().nullable(),
+    level: z.string().optional().nullable(),
+    rating: z.number().optional().nullable(),
+    reviewCount: z.number().optional().nullable(),
+    ratingCount: z.number().optional().nullable(),
+    studentsCount: z.number().optional().nullable(),
+    enrollmentCount: z.number().optional().nullable(),
+    durationMinutes: z.number().optional().nullable(),
+    lessonsCount: z.number().optional().nullable(),
+    lessonCount: z.number().optional().nullable(),
+    price: z.number().optional().nullable(),
+    isPremium: z.boolean().optional().nullable(),
+    isFree: z.boolean().optional().nullable(),
+    status: z.string().optional().nullable(),
+    learningOutcomes: z.array(z.string()).optional().nullable(),
+    requirements: z.array(z.string()).optional().nullable(),
+    tags: z.array(z.string()).optional().nullable(),
+    sections: z.array(sectionSchema).optional().nullable(),
+    publishedAt: z.string().optional().nullable(),
+    createdAt: z.string().optional().nullable(),
+  })
+  .passthrough();
+
+export type CourseApi = z.infer<typeof courseApiSchema>;
+export type Section = z.infer<typeof sectionSchema>;
+export type Lesson = z.infer<typeof lessonSchema>;
+
 export interface Publisher {
   id: string;
   name: string;
@@ -16,9 +100,10 @@ export interface Category {
   slug: string;
   description?: string;
   courseCount?: number;
-  icon: string;
+  icon?: string;
 }
 
+/** UI-facing course model */
 export interface Course {
   id: string;
   title: string;
@@ -28,7 +113,7 @@ export interface Course {
   thumbnailUrl?: string;
   publisher: Pick<Publisher, "id" | "name" | "avatarUrl"> & { slug?: string };
   category?: string | Category;
-  level?: "Beginner" | "Intermediate" | "Advanced" | string;
+  level?: string;
   difficulty?: string;
   rating: number;
   reviewCount?: number;
@@ -47,69 +132,74 @@ export interface Course {
   learningOutcomes?: string[];
   requirements?: string[];
   tags?: string[];
-  sections?: any[];
+  sections?: Section[];
   publishedAt?: string;
   createdAt?: string;
 }
 
-export interface Testimonial {
-  id: string;
-  name: string;
-  role: string;
-  avatarUrl: string;
-  quote: string;
-}
+const difficultyMap: Record<string, string> = {
+  beginner: "Beginner",
+  intermediate: "Intermediate",
+  advanced: "Advanced",
+  all_levels: "All Levels",
+};
 
-/** Normalize backend course shape to the UI-friendly Course type */
-export function normalizeCourse(raw: any): Course {
-  const difficultyMap: Record<string, string> = {
-    beginner: "Beginner",
-    intermediate: "Intermediate",
-    advanced: "Advanced",
-    all_levels: "All Levels",
-  };
+/**
+ * Parse + normalize API course payloads at the boundary.
+ * Invalid payloads still produce a best-effort Course when id+title exist.
+ */
+export function normalizeCourse(raw: unknown): Course {
+  const parsed = courseApiSchema.safeParse(raw);
+  const data = parsed.success ? parsed.data : (raw as CourseApi);
 
-  const durationMinutes = raw.durationMinutes ?? 0;
+  const durationMinutes = data.durationMinutes ?? 0;
   const hours = Math.floor(durationMinutes / 60);
   const mins = durationMinutes % 60;
   const duration =
     hours > 0 ? `${hours}h ${mins > 0 ? `${mins}m` : ""}`.trim() : `${mins}m`;
 
+  const publisher = data.publisher
+    ? {
+        id: data.publisher.id,
+        name: data.publisher.name,
+        avatarUrl: data.publisher.avatarUrl ?? undefined,
+        slug: data.publisher.slug,
+      }
+    : { id: data.publisherId ?? "unknown", name: "Publisher" };
+
+  const difficulty = data.difficulty
+    ? difficultyMap[data.difficulty] || data.difficulty
+    : data.level;
+
   return {
-    id: raw.id,
-    title: raw.title,
-    slug: raw.slug,
-    description: raw.description,
-    shortDescription: raw.shortDescription,
-    thumbnailUrl: raw.thumbnailUrl || "/placeholder-course.jpg",
-    publisher: {
-      id: raw.publisher?.id || "",
-      name: raw.publisher?.name || "Unknown",
-      avatarUrl: raw.publisher?.avatarUrl || "https://i.pravatar.cc/150?u=" + (raw.publisher?.id || "x"),
-      slug: raw.publisher?.slug,
-    },
-    category: typeof raw.category === "object" ? raw.category?.name : raw.category,
-    level: difficultyMap[raw.difficulty] || raw.level || raw.difficulty || "Beginner",
-    difficulty: raw.difficulty,
-    rating: Number(raw.rating) || 0,
-    reviewCount: raw.ratingCount ?? raw.reviewCount ?? 0,
-    ratingCount: raw.ratingCount ?? 0,
-    studentsCount: raw.enrollmentCount ?? raw.studentsCount ?? 0,
-    enrollmentCount: raw.enrollmentCount ?? 0,
+    id: data.id,
+    title: data.title,
+    slug: data.slug ?? data.id,
+    description: data.description ?? "",
+    shortDescription: data.shortDescription ?? undefined,
+    thumbnailUrl: data.thumbnailUrl || "/placeholder-course.jpg",
+    publisher,
+    category: data.category ?? undefined,
+    level: difficulty,
+    difficulty: data.difficulty ?? undefined,
+    rating: data.rating ?? 0,
+    reviewCount: data.reviewCount ?? data.ratingCount ?? 0,
+    ratingCount: data.ratingCount ?? data.reviewCount ?? 0,
+    studentsCount: data.studentsCount ?? data.enrollmentCount ?? 0,
+    enrollmentCount: data.enrollmentCount ?? data.studentsCount ?? 0,
     duration,
     durationMinutes,
-    lessonsCount: raw.lessonCount ?? raw.lessonsCount ?? 0,
-    lessonCount: raw.lessonCount ?? 0,
-    price: Number(raw.price) || 0,
-    isPremium: raw.isPremium ?? false,
-    isFree: raw.isFree ?? Number(raw.price) === 0,
-    progress: raw.progress,
-    status: raw.status,
-    learningOutcomes: raw.learningOutcomes,
-    requirements: raw.requirements,
-    tags: raw.tags,
-    sections: raw.sections,
-    publishedAt: raw.publishedAt,
-    createdAt: raw.createdAt,
+    lessonsCount: data.lessonsCount ?? data.lessonCount ?? 0,
+    lessonCount: data.lessonCount ?? data.lessonsCount ?? 0,
+    price: data.price ?? 0,
+    isPremium: data.isPremium ?? false,
+    isFree: data.isFree ?? (data.price ?? 0) === 0,
+    status: data.status ?? undefined,
+    learningOutcomes: data.learningOutcomes ?? undefined,
+    requirements: data.requirements ?? undefined,
+    tags: data.tags ?? undefined,
+    sections: data.sections ?? undefined,
+    publishedAt: data.publishedAt ?? undefined,
+    createdAt: data.createdAt ?? undefined,
   };
 }

@@ -29,3 +29,28 @@ Confirm exact claim path (`role` vs `roles` vs nested).
 4. **CORS** — if cookie is cross-origin, `credentials: true` + explicit origin (not `*`).
 
 Until (1) ships, the frontend still uses a JS-readable cookie for Edge middleware UX only.
+
+## Phase A (resync)
+
+### Fixed
+- Admin/publisher pages: distinct TanStack Query hooks (no ` "page" === "courses" ` dead branches)
+- Register sends `role: learner | publisher` in signup payload
+- Login/register: react-hook-form + zod + aria-invalid errors
+- Single-flight refresh on 401 via `api/client.ts` → `POST /auth/refresh`
+- OAuth `/callback` no longer fakes success; shows unavailable
+- Deleted `api/modules/auth/{login,logout,register,refresh}.ts` stubs
+
+### Backend contracts still needed
+| Endpoint | Expected |
+|----------|----------|
+| `POST /auth/refresh` | `{ access_token, refresh_token? }` — body may include `refresh_token` |
+| `POST /auth/signup` | Accept optional `role: learner \| publisher` |
+| `GET /admin/users` | Admin user list (optional) |
+| `GET /admin/reports`, `/admin/logs`, `/admin/settings` | Or return 404 and UI shows endpoint unavailable |
+| `GET /publishers/me/students`, `/analytics`, `/earnings`, `/certificates` | Publisher console metrics |
+
+## Phase E
+- CSP remains **Report-Only** until headers are validated against production traffic; then switch to enforcing in `next.config.ts`.
+- Sentry: set `NEXT_PUBLIC_SENTRY_DSN` and add `@sentry/nextjs` when ready.
+- Playwright E2E not included — add when staging API is stable.
+- Render free-tier cold starts: flag for production SLA.

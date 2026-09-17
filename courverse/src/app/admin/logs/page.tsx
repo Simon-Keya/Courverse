@@ -4,43 +4,23 @@ import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/api/client";
 
-/**
- * Phase 3: no mock business data.
- * Wire dedicated admin endpoints as the backend exposes them.
- */
 export default function AdminLogsPage() {
-  const title = "logs".replace(/^\w/, (c) => c.toUpperCase());
   const query = useQuery({
     queryKey: ["admin", "logs"],
     queryFn: async () => {
-      // Prefer real endpoints when available; empty list is valid.
-      try {
-        if ("logs" === "courses") {
-          const { data } = await apiClient.get("/courses", {
-            params: { includeAllStatuses: true, limit: 50 },
-          });
-          return data?.data ?? [];
-        }
-        if ("logs" === "categories") {
-          const { data } = await apiClient.get("/categories");
-          return Array.isArray(data) ? data : [];
-        }
-        if ("logs" === "publishers") {
-          const { data } = await apiClient.get("/publishers");
-          return Array.isArray(data) ? data : [];
-        }
-        return [];
-      } catch {
-        throw new Error("Failed to load");
-      }
+      const { data } = await apiClient.get("/admin/logs");
+      return Array.isArray(data) ? data : data?.data ?? data ?? [];
     },
+    retry: 1,
   });
+
+  const list = Array.isArray(query.data) ? query.data : [];
 
   return (
     <div className="container-page py-8">
-      <h1 className="font-heading text-2xl font-bold text-text">Admin · {title}</h1>
+      <h1 className="font-heading text-2xl font-bold text-text">Admin · Logs</h1>
       <p className="mt-1 text-sm text-text-secondary">
-        Live data only. Empty means no records yet — not demo placeholders.
+        Requests <code className="text-xs">/admin/logs</code>. See MIGRATION-NOTES if this 404s.
       </p>
       {query.isLoading && (
         <div className="mt-10 flex items-center gap-2 text-text-secondary">
@@ -48,27 +28,22 @@ export default function AdminLogsPage() {
         </div>
       )}
       {query.isError && (
-        <div className="mt-8 rounded-card border border-border bg-card p-6">
-          <p className="text-sm text-text-secondary">Could not load {title.toLowerCase()}.</p>
-          <button type="button" className="btn-primary mt-3" onClick={() => query.refetch()}>
+        <div className="mt-8 rounded-card border border-border bg-card p-6 text-sm text-text-secondary">
+          Endpoint unavailable or unauthorized. 
+          <button type="button" className="font-semibold text-primary" onClick={() => query.refetch()}>
             Retry
           </button>
         </div>
       )}
-      {!query.isLoading && !query.isError && (
-        <div className="mt-8 rounded-card border border-border bg-card p-6">
-          {Array.isArray(query.data) && query.data.length > 0 ? (
-            <ul className="divide-y divide-border">
-              {query.data.slice(0, 50).map((row: { id?: string; name?: string; title?: string; email?: string }, i: number) => (
-                <li key={row.id ?? i} className="py-3 text-sm text-text">
-                  {row.title || row.name || row.email || row.id || "Record"}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-text-secondary">No {title.toLowerCase()} records.</p>
-          )}
+      {!query.isLoading && !query.isError && list.length === 0 && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6 text-sm text-text-secondary">
+          No logs data.
         </div>
+      )}
+      {list.length > 0 && (
+        <pre className="mt-8 overflow-auto rounded-card border border-border bg-card p-4 text-xs">
+          {JSON.stringify(list, null, 2)}
+        </pre>
       )}
     </div>
   );

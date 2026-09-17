@@ -2,11 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Search, LayoutGrid, List, SlidersHorizontal, Loader2 } from "lucide-react";
-import { categories as mockCategories } from "@/data/mock";
-import { isDemoMode } from "@/lib/demo";
-import { courses as mockCourses } from "@/data/mock";
 import { CourseCard } from "@/components/course/CourseCard";
 import { useCourses } from "@/hooks/use-courses";
+import { useCategories } from "@/hooks/use-catalog";
 import { normalizeCourse, type Course } from "@/types/course";
 
 const levels = ["All levels", "Beginner", "Intermediate", "Advanced"] as const;
@@ -40,9 +38,10 @@ export default function CoursesPage() {
   }, [data]);
 
   // Demo mode only: explicit opt-in for local development. Never in production.
-  const usingMock = isDemoMode() && (isError || (!isLoading && liveCourses.length === 0));
-  const sourceCourses = usingMock ? mockCourses : liveCourses;
-  const categories = mockCategories;
+  const catsQuery = useCategories();
+  const categories = catsQuery.data ?? [];
+  const usingMock = false;
+  const sourceCourses = liveCourses;
 
   const filtered = useMemo(() => {
     if (!usingMock) return sourceCourses;

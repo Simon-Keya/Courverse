@@ -5,19 +5,14 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { CourseCard } from "@/components/course/CourseCard";
 import { useCourses } from "@/hooks/use-courses";
 import { normalizeCourse } from "@/types/course";
-import { courses as mockCourses } from "@/data/mock";
 
 export function FeaturedCourses() {
-  const { data, isLoading, isError } = useCourses({
+  const { data, isLoading, isError, refetch } = useCourses({
     limit: 4,
     sort: "popular",
-    status: "published",
   });
 
-  const featured =
-    data?.data?.length
-      ? data.data.map(normalizeCourse)
-      : mockCourses.slice(0, 4);
+  const featured = data?.data?.length ? data.data.map(normalizeCourse) : [];
 
   return (
     <section className="container-page py-16">
@@ -27,34 +22,45 @@ export function FeaturedCourses() {
             Featured courses
           </h2>
           <p className="mt-2 text-text-secondary">
-            Hand-picked by practitioners. Start learning today.
+            Discover published courses from the catalog.
           </p>
         </div>
         <Link
           href="/courses"
-          className="hidden items-center gap-1 text-sm font-medium text-primary hover:underline sm:flex"
+          className="hidden items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover sm:flex"
         >
           View all <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      {isLoading && !data ? (
-        <div className="mt-10 flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      {isLoading && (
+        <div className="mt-10 flex items-center justify-center gap-2 text-text-secondary">
+          <Loader2 className="h-5 w-5 animate-spin" /> Loading courses…
         </div>
-      ) : (
+      )}
+
+      {isError && (
+        <div className="mt-10 rounded-card border border-border bg-card p-8 text-center">
+          <p className="text-sm text-text-secondary">Could not load featured courses.</p>
+          <button type="button" className="btn-primary mt-4" onClick={() => refetch()}>
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !isError && featured.length === 0 && (
+        <div className="mt-10 rounded-card border border-border bg-card p-8 text-center text-sm text-text-secondary">
+          No published courses yet.
+        </div>
+      )}
+
+      {featured.length > 0 && (
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
         </div>
       )}
-
-      <div className="mt-8 text-center sm:hidden">
-        <Link href="/courses" className="text-sm font-medium text-primary hover:underline">
-          View all courses →
-        </Link>
-      </div>
     </section>
   );
 }

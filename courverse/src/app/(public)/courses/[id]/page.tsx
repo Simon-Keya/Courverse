@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { wishlistApi } from "@/api/modules/wishlist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
-import { courses as mockCourses, curriculum as mockCurriculum } from "@/data/mock";
 import { useRouter } from "next/navigation";
 
 export default function CourseDetailPage({
@@ -48,9 +47,7 @@ export default function CourseDetailPage({
   });
   const router = useRouter();
 
-  // Fallback to mock when API unavailable
-  const mock = mockCourses.find((c) => c.id === id);
-  const course = raw ? normalizeCourse(raw) : mock ? normalizeCourse(mock) : null;
+  const course = raw ? normalizeCourse(raw) : null;
 
   if (!isLoading && !course) {
     notFound();
@@ -70,16 +67,7 @@ export default function CourseDetailPage({
   const progress = enrollment?.progressPercentage ?? course.progress ?? 0;
   const sections = raw?.sections?.length
     ? raw.sections
-    : mockCurriculum.map((m: any) => ({
-        id: m.id,
-        title: m.title,
-        lessons: m.lessons.map((l: any) => ({
-          id: l.id,
-          title: l.title,
-          type: l.type,
-          durationMinutes: 0,
-          isPreview: false,
-        })),
+    : [],),
       }));
   const totalLessons =
     course.lessonCount ||

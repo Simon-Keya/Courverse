@@ -1,91 +1,75 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Image from "next/image";
-import { Search, MoreVertical } from "lucide-react";
-import { adminUsers } from "@/data/admin-mock";
-import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/api/client";
 
-type RoleFilter = "all" | "learner" | "publisher";
-
+/**
+ * Phase 3: no mock business data.
+ * Wire dedicated admin endpoints as the backend exposes them.
+ */
 export default function AdminUsersPage() {
-  const [query, setQuery] = useState("");
-  const [role, setRole] = useState<RoleFilter>("all");
-
-  const filtered = useMemo(() => {
-    return adminUsers.filter((u) => {
-      const matchesQuery = u.name.toLowerCase().includes(query.toLowerCase()) || u.email.toLowerCase().includes(query.toLowerCase());
-      const matchesRole = role === "all" || u.role === role;
-      return matchesQuery && matchesRole;
-    });
-  }, [query, role]);
+  const title = "users".replace(/^\w/, (c) => c.toUpperCase());
+  const query = useQuery({
+    queryKey: ["admin", "users"],
+    queryFn: async () => {
+      // Prefer real endpoints when available; empty list is valid.
+      try {
+        if ("users" === "courses") {
+          const { data } = await apiClient.get("/courses", {
+            params: { includeAllStatuses: true, limit: 50 },
+          });
+          return data?.data ?? [];
+        }
+        if ("users" === "categories") {
+          const { data } = await apiClient.get("/categories");
+          return Array.isArray(data) ? data : [];
+        }
+        if ("users" === "publishers") {
+          const { data } = await apiClient.get("/publishers");
+          return Array.isArray(data) ? data : [];
+        }
+        return [];
+      } catch {
+        throw new Error("Failed to load");
+      }
+    },
+  });
 
   return (
     <div className="container-page py-8">
-      <h1 className="font-heading text-2xl font-bold text-text">Users</h1>
-      <p className="mt-1 text-text-secondary">{adminUsers.length} total accounts.</p>
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-2 rounded-input border border-border bg-white px-3 py-2 text-sm sm:max-w-xs">
-          <Search className="h-4 w-4 text-text-secondary" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search users…"
-            className="w-full bg-transparent text-text placeholder:text-text-secondary focus:outline-none"
-          />
+      <h1 className="font-heading text-2xl font-bold text-text">Admin · {title}</h1>
+      <p className="mt-1 text-sm text-text-secondary">
+        Live data only. Empty means no records yet — not demo placeholders.
+      </p>
+      {query.isLoading && (
+        <div className="mt-10 flex items-center gap-2 text-text-secondary">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as RoleFilter)}
-          className="rounded-input border border-border bg-white px-3 py-2 text-sm text-text focus:border-primary focus:outline-none"
-        >
-          <option value="all">All roles</option>
-          <option value="learner">Learners</option>
-          <option value="publisher">Publishers</option>
-        </select>
-      </div>
-
-      <div className="mt-6 card-surface overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-text-secondary">
-              <th className="px-6 py-3 font-medium">User</th>
-              <th className="px-6 py-3 font-medium">Role</th>
-              <th className="px-6 py-3 font-medium">Status</th>
-              <th className="px-6 py-3 font-medium">Joined</th>
-              <th className="px-6 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((u) => (
-              <tr key={u.id} className="border-b border-border last:border-b-0">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <Image src={u.avatarUrl || `https://i.pravatar.cc/128?u=${u.id}`} alt={u.name} width={32} height={32} className="rounded-full" />
-                    <div>
-                      <p className="font-medium text-text">{u.name}</p>
-                      <p className="text-xs text-text-secondary">{u.email}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 capitalize text-text-secondary">{u.role}</td>
-                <td className="px-6 py-4">
-                  <Badge variant={u.status === "active" ? "primary" : "neutral"} className="capitalize">
-                    {u.status}
-                  </Badge>
-                </td>
-                <td className="px-6 py-4 text-text-secondary">{u.joined}</td>
-                <td className="px-6 py-4 text-right">
-                  <button aria-label="More options" className="rounded-btn p-1.5 text-text-secondary hover:bg-background-secondary">
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      )}
+      {query.isError && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6">
+          <p className="text-sm text-text-secondary">Could not load {title.toLowerCase()}.</p>
+          <button type="button" className="btn-primary mt-3" onClick={() => query.refetch()}>
+            Retry
+          </button>
+        </div>
+      )}
+      {!query.isLoading && !query.isError && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6">
+          {Array.isArray(query.data) && query.data.length > 0 ? (
+            <ul className="divide-y divide-border">
+              {query.data.slice(0, 50).map((row: { id?: string; name?: string; title?: string; email?: string }, i: number) => (
+                <li key={row.id ?? i} className="py-3 text-sm text-text">
+                  {row.title || row.name || row.email || row.id || "Record"}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-secondary">No {title.toLowerCase()} records.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

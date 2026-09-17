@@ -1,10 +1,28 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isRoleAllowed, roleHome } from "@/permissions/roles";
 
 /**
- * UX route protection via accessToken cookie.
- * Backend API authorization remains the source of truth.
+ * UX route protection.
+ * Reads accessToken cookie and optionally decodes JWT payload for role.
+ * Backend remains the authority for every API call.
  */
+
+function decodeJwtPayload(token: string): { role?: string; sub?: string } | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json =
+      typeof atob === "function"
+        ? atob(base64)
+        : Buffer.from(base64, "base64").toString("utf8");
+    return JSON.parse(json) as { role?: string; sub?: string };
+  } catch {
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -17,6 +35,8 @@ export function middleware(request: NextRequest) {
   }
 
   const token = request.cookies.get("accessToken")?.value;
+  const payload = token ? decodeJwtPayload(token) : null;
+  const role = payload?.role;
 
   const publicExact = new Set([
     "/",
@@ -32,11 +52,7 @@ export function middleware(request: NextRequest) {
     "/callback",
   ]);
 
-  const publicPrefixes = [
-    "/courses",
-    "/categories",
-    "/publishers",
-  ];
+  const publicPrefixes = ["/courses", "/categories", "/publishers"];
 
   const isPublic =
     publicExact.has(pathname) ||
@@ -62,7 +78,9 @@ export function middleware(request: NextRequest) {
 
   if (isPublic) {
     if (token && (pathname === "/login" || pathname === "/register")) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(
+        new URL(roleHome(role), request.url),
+      );
     }
     return NextResponse.next();
   }
@@ -71,6 +89,11 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Role gate for admin / publisher (and other mapped prefixes)
+  if (token && !isRoleAllowed(pathname, role)) {
+    return NextResponse.redirect(new URL(roleHome(role), request.url));
   }
 
   return NextResponse.next();

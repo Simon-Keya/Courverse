@@ -1,64 +1,78 @@
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { Star, Users, BookOpen, BadgeCheck } from "lucide-react";
-import { publishers, courses } from "@/data/mock";
+"use client";
+
+import { use } from "react";
+import Link from "next/link";
+import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { publishersApi } from "@/api/modules/publishers";
+import { coursesApi } from "@/api/modules/courses";
 import { CourseCard } from "@/components/course/CourseCard";
+import { normalizeCourse } from "@/types/course";
 
-export function generateStaticParams() {
-  return publishers.map((p) => ({ id: p.id }));
-}
+export default function PublisherDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
 
-export default async function PublisherDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const publisher = publishers.find((p) => p.id === id);
-  if (!publisher) notFound();
+  const publisher = useQuery({
+    queryKey: ["publisher", id],
+    queryFn: () => publishersApi.getById(id),
+  });
 
-  const publisherCourses = courses.filter((c) => c.publisher.id === publisher.id);
+  const courses = useQuery({
+    queryKey: ["courses", "publisher", id],
+    queryFn: () => coursesApi.list({ publisherId: id, limit: 24 }),
+    enabled: !!id,
+  });
+
+  if (publisher.isLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-text-secondary">
+        <Loader2 className="h-5 w-5 animate-spin" /> Loading publisher…
+      </div>
+    );
+  }
+
+  if (publisher.isError || !publisher.data) {
+    return (
+      <div className="container-page py-16 text-center">
+        <p className="font-heading text-lg font-semibold text-text">Publisher not found</p>
+        <Link href="/publishers" className="btn-primary mt-4 inline-flex">
+          All publishers
+        </Link>
+      </div>
+    );
+  }
+
+  const p = publisher.data;
+  const list = (courses.data?.data ?? []).map(normalizeCourse);
 
   return (
     <>
       <section className="border-b border-border bg-background-secondary py-16">
-        <div className="container-page flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
-          <Image
-            src={publisher.avatarUrl || "https://i.pravatar.cc/150"}
-            alt={publisher.name}
-            width={96}
-            height={96}
-            className="rounded-full border-4 border-white shadow-sm"
-          />
-          <div>
-            <div className="flex items-center justify-center gap-2 sm:justify-start">
-              <h1 className="font-heading text-3xl font-bold text-text">{publisher.name}</h1>
-              <BadgeCheck className="h-6 w-6 text-primary" />
-            </div>
-            <p className="mt-2 max-w-xl text-text-secondary">{publisher.bio}</p>
-
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-5 text-sm text-text-secondary sm:justify-start">
-              <span className="flex items-center gap-1.5">
-                <Star className="h-4 w-4 fill-reward text-reward" />
-                <span className="font-semibold text-text">{publisher.rating ?? 0}</span> rating
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Users className="h-4 w-4" /> {(publisher.studentsCount ?? 0).toLocaleString()} students
-              </span>
-              <span className="flex items-center gap-1.5">
-                <BookOpen className="h-4 w-4" /> {publisher.coursesCount ?? 0} courses
-              </span>
-            </div>
-          </div>
+        <div className="container-page">
+          <h1 className="font-heading text-3xl font-bold text-text sm:text-4xl">{p.name}</h1>
+          {p.bio && <p className="mt-3 max-w-2xl text-text-secondary">{p.bio}</p>}
         </div>
       </section>
-
-      <section className="container-page py-16">
-        <h2 className="font-heading text-2xl font-bold text-text">Courses by {publisher.name}</h2>
-        {publisherCourses.length > 0 ? (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {publisherCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+      <section className="container-page py-12">
+        <h2 className="font-heading text-xl font-bold text-text">Courses</h2>
+        {courses.isLoading && (
+          <div className="mt-6 flex items-center gap-2 text-text-secondary">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+          </div>
+        )}
+        {!courses.isLoading && list.length === 0 && (
+          <p className="mt-6 text-sm text-text-secondary">No published courses yet.</p>
+        )}
+        {list.length > 0 && (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((c) => (
+              <CourseCard key={c.id} course={c} />
             ))}
           </div>
-        ) : (
-          <p className="mt-6 text-text-secondary">This publisher hasn't published any courses yet.</p>
         )}
       </section>
     </>

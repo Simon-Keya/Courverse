@@ -1,49 +1,96 @@
+"use client";
+
+import { use } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, Wallet, Megaphone, Languages, BookOpen, UserCheck, Wrench, Heart } from "lucide-react";
-import { categories, courses } from "@/data/mock";
+import { Loader2, LayoutGrid } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { categoriesApi } from "@/api/modules/categories";
+import { coursesApi } from "@/api/modules/courses";
 import { CourseCard } from "@/components/course/CourseCard";
+import { normalizeCourse } from "@/types/course";
 
-const categoryIcons: Record<string, typeof Code2> = {
-  Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, Wallet, Megaphone, Languages, BookOpen, UserCheck, Wrench, Heart,
-};
+export default function CategoryDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = use(params);
 
-export function generateStaticParams() {
-  return categories.map((c) => ({ slug: c.slug }));
-}
+  const category = useQuery({
+    queryKey: ["category", slug],
+    queryFn: () => categoriesApi.getBySlug(slug),
+  });
 
-export default async function CategoryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const category = categories.find((c) => c.slug === slug);
-  if (!category) notFound();
+  const courses = useQuery({
+    queryKey: ["courses", "category", category.data?.id],
+    queryFn: () =>
+      coursesApi.list({ categoryId: category.data!.id, limit: 24 }),
+    enabled: !!category.data?.id,
+  });
 
-  const Icon = categoryIcons[category.icon ?? "Code2"] ?? Code2;
-  const categoryCourses = courses.filter((c) => c.category === category.name);
+  if (category.isError) {
+    notFound();
+  }
+
+  if (category.isLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-text-secondary">
+        <Loader2 className="h-5 w-5 animate-spin" /> Loading category…
+      </div>
+    );
+  }
+
+  if (!category.data) {
+    notFound();
+  }
+
+  const list = courses.data?.data?.map(normalizeCourse) ?? [];
 
   return (
     <>
       <section className="border-b border-border bg-background-secondary py-16">
         <div className="container-page flex items-center gap-4">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
-            <Icon className="h-7 w-7" />
+            <LayoutGrid className="h-7 w-7" />
           </span>
           <div>
-            <h1 className="font-heading text-3xl font-bold text-text sm:text-4xl">{category.name}</h1>
-            <p className="mt-1 text-text-secondary">{category.description}</p>
+            <h1 className="font-heading text-3xl font-bold text-text sm:text-4xl">
+              {category.data.name}
+            </h1>
+            {category.data.description && (
+              <p className="mt-2 max-w-2xl text-text-secondary">
+                {category.data.description}
+              </p>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="container-page py-16">
-        <p className="text-sm text-text-secondary">{categoryCourses.length} of {category.courseCount} courses shown</p>
-        {categoryCourses.length > 0 ? (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {categoryCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+      <section className="container-page py-12">
+        {courses.isLoading && (
+          <div className="flex items-center gap-2 text-text-secondary">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading courses…
+          </div>
+        )}
+        {courses.isError && (
+          <p className="text-sm text-text-secondary">Could not load courses.</p>
+        )}
+        {!courses.isLoading && list.length === 0 && (
+          <p className="text-sm text-text-secondary">No courses in this category yet.</p>
+        )}
+        {list.length > 0 && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((c) => (
+              <CourseCard key={c.id} course={c} />
             ))}
           </div>
-        ) : (
-          <p className="mt-6 text-text-secondary">No courses published in this category yet.</p>
         )}
+        <div className="mt-10">
+          <Link href="/categories" className="text-sm font-semibold text-primary">
+            ← All categories
+          </Link>
+        </div>
       </section>
     </>
   );

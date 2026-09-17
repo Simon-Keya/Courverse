@@ -1,84 +1,75 @@
 "use client";
 
-import { useState } from "react";
-import { adminProfile } from "@/data/admin-mock";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/api/client";
 
+/**
+ * Phase 3: no mock business data.
+ * Wire dedicated admin endpoints as the backend exposes them.
+ */
 export default function AdminSettingsPage() {
-  const [saved, setSaved] = useState(false);
+  const title = "settings".replace(/^\w/, (c) => c.toUpperCase());
+  const query = useQuery({
+    queryKey: ["admin", "settings"],
+    queryFn: async () => {
+      // Prefer real endpoints when available; empty list is valid.
+      try {
+        if ("settings" === "courses") {
+          const { data } = await apiClient.get("/courses", {
+            params: { includeAllStatuses: true, limit: 50 },
+          });
+          return data?.data ?? [];
+        }
+        if ("settings" === "categories") {
+          const { data } = await apiClient.get("/categories");
+          return Array.isArray(data) ? data : [];
+        }
+        if ("settings" === "publishers") {
+          const { data } = await apiClient.get("/publishers");
+          return Array.isArray(data) ? data : [];
+        }
+        return [];
+      } catch {
+        throw new Error("Failed to load");
+      }
+    },
+  });
 
   return (
     <div className="container-page py-8">
-      <h1 className="font-heading text-2xl font-bold text-text">Settings</h1>
-      <p className="mt-1 text-text-secondary">Platform configuration and your admin account.</p>
-
-      <form
-        className="mt-6 max-w-2xl space-y-6"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setSaved(true);
-          setTimeout(() => setSaved(false), 2500);
-        }}
-      >
-        <div className="card-surface space-y-5 p-6">
-          <p className="font-heading font-semibold text-text">Admin account</p>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <label className="text-sm font-medium text-text" htmlFor="name">Name</label>
-              <input
-                id="name"
-                type="text"
-                defaultValue={adminProfile.name}
-                className="mt-1.5 w-full rounded-input border border-border px-3.5 py-2.5 text-sm text-text focus:border-primary focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-text" htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                defaultValue={adminProfile.email}
-                className="mt-1.5 w-full rounded-input border border-border px-3.5 py-2.5 text-sm text-text focus:border-primary focus:outline-none"
-              />
-            </div>
-          </div>
+      <h1 className="font-heading text-2xl font-bold text-text">Admin · {title}</h1>
+      <p className="mt-1 text-sm text-text-secondary">
+        Live data only. Empty means no records yet — not demo placeholders.
+      </p>
+      {query.isLoading && (
+        <div className="mt-10 flex items-center gap-2 text-text-secondary">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
-
-        <div className="card-surface space-y-4 p-6">
-          <p className="font-heading font-semibold text-text">Platform settings</p>
-          <label className="flex items-center justify-between gap-4 text-sm text-text">
-            Require manual review before publishing new courses
-            <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
-          </label>
-          <label className="flex items-center justify-between gap-4 text-sm text-text">
-            Allow publishers to set custom pricing
-            <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
-          </label>
-          <label className="flex items-center justify-between gap-4 text-sm text-text">
-            Auto-flag courses with low ratings for review
-            <input type="checkbox" className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
-          </label>
+      )}
+      {query.isError && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6">
+          <p className="text-sm text-text-secondary">Could not load {title.toLowerCase()}.</p>
+          <button type="button" className="btn-primary mt-3" onClick={() => query.refetch()}>
+            Retry
+          </button>
         </div>
-
-        <div className="card-surface space-y-5 p-6">
-          <p className="font-heading font-semibold text-text">Default publisher revenue share</p>
-          <div className="flex items-center gap-3">
-            <input
-              type="range"
-              min={50}
-              max={90}
-              defaultValue={70}
-              className="w-full accent-primary"
-            />
-            <span className="w-12 shrink-0 text-right text-sm font-semibold text-text">70%</span>
-          </div>
+      )}
+      {!query.isLoading && !query.isError && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6">
+          {Array.isArray(query.data) && query.data.length > 0 ? (
+            <ul className="divide-y divide-border">
+              {query.data.slice(0, 50).map((row: { id?: string; name?: string; title?: string; email?: string }, i: number) => (
+                <li key={row.id ?? i} className="py-3 text-sm text-text">
+                  {row.title || row.name || row.email || row.id || "Record"}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-secondary">No {title.toLowerCase()} records.</p>
+          )}
         </div>
-
-        <div className="flex items-center gap-3">
-          <Button type="submit">Save settings</Button>
-          {saved && <span className="text-sm font-medium text-primary">Settings saved</span>}
-        </div>
-      </form>
+      )}
     </div>
   );
 }

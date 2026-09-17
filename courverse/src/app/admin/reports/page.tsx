@@ -1,79 +1,75 @@
 "use client";
 
-import { useState } from "react";
-import { AlertCircle } from "lucide-react";
-import { adminReports, adminRevenueTrend, platformStats } from "@/data/admin-mock";
-import { BarChart } from "@/components/charts/BarChart";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/api/client";
 
-type Filter = "all" | "open" | "investigating" | "resolved";
-
-const statusVariant: Record<string, "neutral" | "info" | "primary"> = {
-  open: "neutral",
-  investigating: "info",
-  resolved: "primary",
-};
-
-const tabs: { id: Filter; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "open", label: "Open" },
-  { id: "investigating", label: "Investigating" },
-  { id: "resolved", label: "Resolved" },
-];
-
+/**
+ * Phase 3: no mock business data.
+ * Wire dedicated admin endpoints as the backend exposes them.
+ */
 export default function AdminReportsPage() {
-  const [filter, setFilter] = useState<Filter>("all");
-  const filtered = filter === "all" ? adminReports : adminReports.filter((r) => r.status === filter);
+  const title = "reports".replace(/^\w/, (c) => c.toUpperCase());
+  const query = useQuery({
+    queryKey: ["admin", "reports"],
+    queryFn: async () => {
+      // Prefer real endpoints when available; empty list is valid.
+      try {
+        if ("reports" === "courses") {
+          const { data } = await apiClient.get("/courses", {
+            params: { includeAllStatuses: true, limit: 50 },
+          });
+          return data?.data ?? [];
+        }
+        if ("reports" === "categories") {
+          const { data } = await apiClient.get("/categories");
+          return Array.isArray(data) ? data : [];
+        }
+        if ("reports" === "publishers") {
+          const { data } = await apiClient.get("/publishers");
+          return Array.isArray(data) ? data : [];
+        }
+        return [];
+      } catch {
+        throw new Error("Failed to load");
+      }
+    },
+  });
 
   return (
     <div className="container-page py-8">
-      <h1 className="font-heading text-2xl font-bold text-text">Reports</h1>
-      <p className="mt-1 text-text-secondary">Platform revenue and moderation queue.</p>
-
-      <div className="mt-6 card-surface p-6">
-        <div className="flex items-center justify-between">
-          <p className="font-heading font-semibold text-text">Platform revenue</p>
-          <span className="text-sm text-text-secondary">Total: ${platformStats.totalRevenue.toLocaleString()}</span>
+      <h1 className="font-heading text-2xl font-bold text-text">Admin · {title}</h1>
+      <p className="mt-1 text-sm text-text-secondary">
+        Live data only. Empty means no records yet — not demo placeholders.
+      </p>
+      {query.isLoading && (
+        <div className="mt-10 flex items-center gap-2 text-text-secondary">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
-        <div className="mt-6">
-          <BarChart data={adminRevenueTrend} valueFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+      )}
+      {query.isError && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6">
+          <p className="text-sm text-text-secondary">Could not load {title.toLowerCase()}.</p>
+          <button type="button" className="btn-primary mt-3" onClick={() => query.refetch()}>
+            Retry
+          </button>
         </div>
-      </div>
-
-      <div className="mt-8 flex items-center justify-between">
-        <h2 className="font-heading text-lg font-bold text-text">Moderation queue</h2>
-        <div className="flex w-fit items-center gap-1 rounded-input border border-border bg-white p-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilter(tab.id)}
-              className={`rounded-btn px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                filter === tab.id ? "bg-primary-light text-primary-hover" : "text-text-secondary hover:text-text"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      )}
+      {!query.isLoading && !query.isError && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6">
+          {Array.isArray(query.data) && query.data.length > 0 ? (
+            <ul className="divide-y divide-border">
+              {query.data.slice(0, 50).map((row: { id?: string; name?: string; title?: string; email?: string }, i: number) => (
+                <li key={row.id ?? i} className="py-3 text-sm text-text">
+                  {row.title || row.name || row.email || row.id || "Record"}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-secondary">No {title.toLowerCase()} records.</p>
+          )}
         </div>
-      </div>
-
-      <div className="mt-4 card-surface divide-y divide-border">
-        {filtered.map((r) => (
-          <div key={r.id} className="flex items-start gap-4 px-6 py-4">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-error" />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-text">{r.type}</p>
-                <Badge variant={statusVariant[r.status]} className="capitalize">{r.status}</Badge>
-              </div>
-              <p className="mt-1 text-sm text-text-secondary">{r.target}</p>
-              <p className="mt-1 text-xs text-text-secondary">Reported by {r.reporter} · {r.date}</p>
-            </div>
-            {r.status !== "resolved" && <Button size="sm" variant="secondary" className="shrink-0">Investigate</Button>}
-          </div>
-        ))}
-      </div>
+      )}
     </div>
   );
 }

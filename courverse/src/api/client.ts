@@ -17,16 +17,22 @@ export const apiClient: AxiosInstance = axios.create({
   timeout: 15000,
 });
 
-// Attach Bearer token from localStorage (client only)
+function readAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return (
+    sessionStorage.getItem("access_token") ||
+    localStorage.getItem("access_token") // legacy cleanup path
+  );
+}
+
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
+      const token = readAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
-    // Fail fast if no base URL configured in production
     if (!config.baseURL && typeof window !== "undefined") {
       return Promise.reject({
         message:
@@ -50,10 +56,10 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401 && typeof window !== "undefined") {
+      sessionStorage.removeItem("access_token");
       localStorage.removeItem("access_token");
-      // Clear auth cookie used by middleware
       document.cookie =
-        "accessToken=; path=/; max-age=0; SameSite=Lax";
+        "accessToken=; path=/; max-age=0; SameSite=Strict";
     }
 
     const normalized: ApiError = {

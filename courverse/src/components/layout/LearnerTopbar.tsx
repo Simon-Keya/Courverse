@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, Search, Bell, Flame, ChevronDown } from "lucide-react";
-import { currentUser, notificationsList } from "@/data/mock";
+import { currentUser, notificationsList } from "@/lib/demo";
 
 export function LearnerTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   const [notifOpen, setNotifOpen] = useState(false);

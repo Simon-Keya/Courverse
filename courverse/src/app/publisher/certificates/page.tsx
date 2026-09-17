@@ -1,26 +1,34 @@
-import { Award } from "lucide-react";
-import { publisherCertificatesIssued } from "@/data/publisher-mock";
+"use client";
+
+import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { publisherApi } from "@/api/modules/publisher";
 
 export default function PublisherCertificatesPage() {
+  const courses = useQuery({
+    queryKey: ["publisher", "courses", "certificates"],
+    queryFn: () => publisherApi.myCourses({ limit: 50 }),
+    enabled: "certificates" === "courses" || "certificates" === "quizzes",
+  });
+
   return (
     <div className="container-page py-8">
-      <h1 className="font-heading text-2xl font-bold text-text">Certificates issued</h1>
-      <p className="mt-1 text-text-secondary">{publisherCertificatesIssued.length} certificates awarded to your students.</p>
-
-      <div className="mt-6 card-surface divide-y divide-border">
-        {publisherCertificatesIssued.map((c) => (
-          <div key={c.id} className="flex items-center gap-4 px-6 py-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-yellow-50 text-reward">
-              <Award className="h-5 w-5" />
-            </span>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-text">{c.learner}</p>
-              <p className="text-xs text-text-secondary">{c.course}</p>
-            </div>
-            <p className="shrink-0 text-xs text-text-secondary">Issued {c.issuedDate}</p>
-          </div>
-        ))}
-      </div>
+      <h1 className="font-heading text-2xl font-bold text-text">Publisher · Certificates</h1>
+      <p className="mt-1 text-sm text-text-secondary">
+        Live data only. Dedicated certificates APIs will expand this view.
+      </p>
+      {courses.isLoading && (
+        <div className="mt-8 flex items-center gap-2 text-text-secondary">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      )}
+      {!courses.isLoading && (
+        <div className="mt-8 rounded-card border border-border bg-card p-6 text-sm text-text-secondary">
+          {(courses.data?.data?.length ?? 0) > 0
+            ? `${courses.data?.meta?.total ?? courses.data?.data?.length} course(s) available for this section.`
+            : "No data yet for this section."}
+        </div>
+      )}
     </div>
   );
 }

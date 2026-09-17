@@ -11,15 +11,27 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
+  const [fieldError, setFieldError] = useState<string | null>(null);
   const login = useLogin();
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldError(null);
+    if (password.length < 6) {
+      setFieldError("Password must be at least 6 characters.");
+      return;
+    }
     login.mutate(
-      { email, password },
+      { email, password, remember },
       {
-        onError: (err: any) => {
-          toast.error(err?.message || "Invalid email or password");
+        onError: (err: unknown) => {
+          const message =
+            err && typeof err === "object" && "message" in err
+              ? String((err as { message: string }).message)
+              : "Invalid email or password";
+          setFieldError(message);
+          toast.error(message);
         },
         onSuccess: () => {
           toast.success("Welcome back!");
@@ -67,6 +79,8 @@ export default function LoginPage() {
           <div className="relative mt-1.5">
             <input
               id="password"
+              aria-invalid={fieldError ? "true" : "false"}
+              aria-describedby={fieldError ? "login-error" : undefined}
               type={showPassword ? "text" : "password"}
               required
               value={password}
@@ -89,11 +103,18 @@ export default function LoginPage() {
         <label className="flex items-center gap-2 text-sm text-text-secondary">
           <input
             type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
             className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
           Keep me logged in
         </label>
 
+        {fieldError && (
+          <p id="login-error" role="alert" className="text-sm text-error">
+            {fieldError}
+          </p>
+        )}
         <Button type="submit" className="w-full" disabled={login.isPending}>
           {login.isPending ? (
             <>

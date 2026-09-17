@@ -8,6 +8,7 @@ import { useMyEnrollments } from "@/hooks/use-courses";
 import { normalizeCourse, type Course } from "@/types/course";
 import { useAuthStore } from "@/store/auth.store";
 import { courses as mockCourses } from "@/data/mock";
+import { isDemoMode } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
 
 type Status = "all" | "in-progress" | "completed";

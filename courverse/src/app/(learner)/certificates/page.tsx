@@ -5,6 +5,7 @@ import { useMyCertificates } from "@/hooks/use-courses";
 import { useAuthStore } from "@/store/auth.store";
 import Link from "next/link";
 import { certificates as mockCerts } from "@/data/mock";
+import { isDemoMode } from "@/lib/demo";
 
 export default function CertificatesPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);

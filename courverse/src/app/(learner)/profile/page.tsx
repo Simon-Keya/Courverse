@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Camera, Trophy, Flame, BookOpen, Award } from "lucide-react";
 import { currentUser, dashboardStats, certificates } from "@/data/mock";
+import { isDemoMode } from "@/lib/demo";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 
 export default function ProfilePage() {

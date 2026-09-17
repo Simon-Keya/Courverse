@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard, BookOpen, Trophy, Award, Heart, User, GraduationCap, X,
-} from "lucide-react";
+import { LayoutDashboard, BookOpen, Trophy, Award, Heart, User, GraduationCap, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [

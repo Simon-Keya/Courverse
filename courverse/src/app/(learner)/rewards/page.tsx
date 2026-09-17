@@ -1,5 +1,6 @@
 import { Award, Sparkles, Sunrise, Ticket, Flame, CircleDashed, Coins, History } from "lucide-react";
 import { currentUser, rewards, redemptionHistory } from "@/data/mock";
+import { isDemoMode } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
 
 const icons: Record<string, typeof Award> = { Award, Sparkles, Sunrise, Ticket, Flame, CircleDashed };

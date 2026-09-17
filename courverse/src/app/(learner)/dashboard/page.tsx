@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Flame, Trophy, BookOpen, TrendingUp, Award, ArrowRight, Loader2,
-} from "lucide-react";
+import { Flame, Trophy, BookOpen, TrendingUp, Award, ArrowRight, Loader2 } from "lucide-react";
 import { courses as mockCourses, rewards as mockRewards } from "@/data/mock";
+import { isDemoMode } from "@/lib/demo";
 import { CourseCard } from "@/components/course/CourseCard";
 import { useAuthStore } from "@/store/auth.store";
 import { useMyEnrollments, useCourses } from "@/hooks/use-courses";

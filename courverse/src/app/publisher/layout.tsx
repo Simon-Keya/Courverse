@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  LayoutDashboard, BarChart3, BookOpen, HelpCircle, Users, Wallet, Award, Settings,
-} from "lucide-react";
+import { LayoutDashboard, BarChart3, BookOpen, HelpCircle, Users, Wallet, Award, Settings } from "lucide-react";
 import { DashboardSidebar, DashboardNavItem } from "@/components/layout/DashboardSidebar";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { publisherProfile } from "@/data/publisher-mock";

@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  LayoutDashboard, Users, BookOpen, Building2, FolderTree, Trophy, Flag, Settings, ScrollText,
-} from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, Building2, FolderTree, Trophy, Flag, Settings, ScrollText } from "lucide-react";
 import { DashboardSidebar, DashboardNavItem } from "@/components/layout/DashboardSidebar";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { adminProfile } from "@/data/admin-mock";

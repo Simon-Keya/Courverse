@@ -1,12 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Search, ArrowRight, Star, Code2, BarChart3, Palette, Briefcase,
-  Smartphone, Sparkles, Flame, Trophy, Award,
-} from "lucide-react";
+import { Search, ArrowRight, Star, Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, Flame, Trophy, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FeaturedCourses } from "@/components/course/FeaturedCourses";
 import { categories, publishers, testimonials } from "@/data/mock";
+import { isDemoMode } from "@/lib/demo";
 
 const categoryIcons: Record<string, typeof Code2> = {
   Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles,

@@ -4,9 +4,7 @@ import { use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  Star, Clock, BarChart3, PlayCircle, CheckCircle2, Sparkles, Users, Loader2, BookOpen,
-} from "lucide-react";
+import { Star, Clock, BarChart3, PlayCircle, CheckCircle2, Sparkles, Users, Loader2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCourse, useEnrollment, useEnroll } from "@/hooks/use-courses";

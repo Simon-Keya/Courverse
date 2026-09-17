@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, Wallet, Megaphone, Languages, BookOpen, UserCheck, Wrench, Heart, Wallet, Megaphone, Languages, BookOpen, UserCheck, Wrench, Heart } from "lucide-react";
+import { Code2, BarChart3, Palette, Briefcase, Smartphone, Sparkles, Wallet, Megaphone, Languages, BookOpen, UserCheck, Wrench, Heart } from "lucide-react";
 import { categories, courses } from "@/data/mock";
 import { CourseCard } from "@/components/course/CourseCard";
 

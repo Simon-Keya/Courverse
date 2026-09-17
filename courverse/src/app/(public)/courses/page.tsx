@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Search, LayoutGrid, List, SlidersHorizontal, Loader2 } from "lucide-react";
-import { courses as mockCourses, categories as mockCategories } from "@/data/mock";
+import { categories as mockCategories } from "@/data/mock";
+import { isDemoMode } from "@/lib/demo";
+import { courses as mockCourses } from "@/data/mock";
 import { CourseCard } from "@/components/course/CourseCard";
 import { useCourses } from "@/hooks/use-courses";
 import { normalizeCourse, type Course } from "@/types/course";
@@ -30,7 +32,6 @@ export default function CoursesPage() {
     sort: "newest",
   });
 
-  // Prefer live data; fall back to mock when API is unavailable
   const liveCourses: Course[] = useMemo(() => {
     if (data?.data?.length) {
       return data.data.map(normalizeCourse);
@@ -38,12 +39,13 @@ export default function CoursesPage() {
     return [];
   }, [data]);
 
-  const usingMock = isError || (!isLoading && liveCourses.length === 0);
+  // Demo mode only: explicit opt-in for local development. Never in production.
+  const usingMock = isDemoMode() && (isError || (!isLoading && liveCourses.length === 0));
   const sourceCourses = usingMock ? mockCourses : liveCourses;
-  const categories = mockCategories; // categories API can be wired later
+  const categories = mockCategories;
 
   const filtered = useMemo(() => {
-    if (!usingMock) return sourceCourses; // server already filtered
+    if (!usingMock) return sourceCourses;
     return sourceCourses.filter((c) => {
       const matchesQuery =
         !query ||
@@ -57,6 +59,8 @@ export default function CoursesPage() {
   }, [sourceCourses, query, category, level, usingMock]);
 
   const total = usingMock ? filtered.length : data?.meta?.total ?? filtered.length;
+  const showError = isError && !usingMock;
+  const showEmpty = !isLoading && !showError && filtered.length === 0;
 
   return (
     <>
